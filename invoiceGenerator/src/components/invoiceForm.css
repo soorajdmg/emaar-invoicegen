@@ -585,6 +585,22 @@
   .item-delete-btn           { grid-row: 1; grid-column: 3; }
 
   .enter-hint { display: none; }
+
+  /* Add bottom padding so fixed footer doesn't cover the last card */
+  .invoice-layout {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  /* Prevent iOS Safari auto-zoom on input focus (triggered below 16px) */
+  .field-input,
+  .field-input-mono,
+  .billed-name-input,
+  .billed-address-input,
+  .item-input,
+  .item-input-num,
+  .notes-textarea {
+    font-size: 16px;
+  }
 }
 
 /* ── Show/hide helpers ───────────────────────────────── */

@@ -142,14 +142,16 @@
 
 /* ── Mobile generate bar ─────────────────────────────── */
 .mobile-footer {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px 16px;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
@@ -204,7 +206,7 @@
 
 .toast-wrapper-mobile {
   position: fixed;
-  bottom: 72px; /* above mobile footer */
+  bottom: calc(80px + env(safe-area-inset-bottom)); /* above fixed mobile footer */
   left: 12px;
   right: 12px;
   z-index: 100;
@@ -229,6 +231,10 @@
 }
 
 .toast-mobile {
+  justify-content: center;
+}
+
+.toast-mobile.toast-has-undo {
   justify-content: space-between;
 }
 
