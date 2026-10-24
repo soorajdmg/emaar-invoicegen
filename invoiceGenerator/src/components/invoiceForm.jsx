@@ -395,23 +395,22 @@ const InvoiceForm = () => {
         )}
       </div>
 
-      {/* Toast desktop */}
+      {/* Toast — fixed center on desktop, fixed above mobile footer on mobile */}
       {toast && (
-        <div className="toast-wrapper-desktop hide-mobile">
-          <div className="toast toast-desktop">
-            <span>{toast.text}</span>
-            {toast.canUndo && <button className="toast-undo-btn" onClick={handleUndo}>Undo</button>}
+        <>
+          <div className="toast-wrapper-desktop hide-mobile">
+            <div className="toast toast-desktop">
+              <span>{toast.text}</span>
+              {toast.canUndo && <button className="toast-undo-btn" onClick={handleUndo}>Undo</button>}
+            </div>
           </div>
-        </div>
-      )}
-      {/* Toast mobile */}
-      {toast && (
-        <div className="toast-wrapper-mobile show-mobile">
-          <div className="toast toast-mobile">
-            <span>{toast.text}</span>
-            {toast.canUndo && <button className="toast-undo-btn" onClick={handleUndo}>Undo</button>}
+          <div className="toast-wrapper-mobile show-mobile">
+            <div className="toast toast-mobile">
+              <span>{toast.text}</span>
+              {toast.canUndo && <button className="toast-undo-btn" onClick={handleUndo}>Undo</button>}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
