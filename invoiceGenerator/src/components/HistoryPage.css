@@ -1,0 +1,609 @@
+/* ── History page layout ──────────────────────────────── */
+.history-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  box-sizing: border-box;
+  animation: fadeIn 220ms ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.history-title-block {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.history-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+
+.history-count {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+.history-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-tab {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 150ms, border-color 150ms;
+}
+
+.history-tab:hover { color: var(--text); }
+
+.history-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.draft-saved-at {
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Filters ──────────────────────────────────────────── */
+.history-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.history-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 14px;
+  color: var(--faint);
+  transition: border-color 150ms;
+}
+.history-search-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.history-search {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  padding: 11px 0;
+  font-family: inherit;
+}
+
+.history-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Currency pill */
+.history-page .currency-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.history-page .currency-thumb {
+  position: absolute;
+  inset: 3px;
+  width: calc(33.333% - 3px);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,.10);
+  transition: transform 200ms cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+.history-page .currency-thumb.aed   { transform: translateX(calc(200% + 4px)); }
+.history-page .currency-thumb.all   { transform: translateX(0); }
+.history-page .currency-option {
+  position: relative;
+  z-index: 1;
+  padding: 5px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.history-page .currency-option.active { color: var(--text); }
+.history-page .currency-pill:has(.currency-option:nth-child(3).active) .currency-thumb {
+  transform: translateX(calc(100% + 2px));
+}
+
+.history-sort-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-sort-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.history-sort-select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  padding: 6px 28px 6px 10px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 150ms;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+}
+.history-sort-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ── Table (desktop) ──────────────────────────────────── */
+.history-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.history-table thead tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.history-table th {
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.history-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 120ms;
+}
+.history-table tbody tr:last-child { border-bottom: none; }
+.history-table tbody tr:hover { background: var(--row-hover); }
+
+.history-table td {
+  padding: 13px 16px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.history-inv-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.history-date {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.history-customer { font-weight: 500; }
+
+/* ── Marquee cell ─────────────────────────────────────── */
+.marquee-cell {
+  max-width: 180px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.marquee-wrap {
+  display: flex;
+  width: max-content;
+  transform: translateY(2px);
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 14px;
+  flex-shrink: 0;
+  padding-right: 48px;
+}
+
+.marquee-text--bold  { font-weight: 500; color: var(--text); }
+.marquee-text--muted { color: var(--muted); }
+
+.marquee-copy {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 14px;
+  flex-shrink: 0;
+  padding-right: 48px;
+}
+
+.history-row:hover .marquee-wrap.marquee-active {
+  animation: marquee-scroll 4s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0) translateY(2px); }
+  100% { transform: translateX(-50%) translateY(2px); }
+}
+
+/* ── Currency badge ───────────────────────────────────── */
+.history-currency-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.history-currency-inr {
+  background: oklch(0.95 0.03 145);
+  color: oklch(0.45 0.1 145);
+}
+.history-currency-aed {
+  background: oklch(0.95 0.03 228);
+  color: oklch(0.45 0.1 228);
+}
+[data-theme='dark'] .history-currency-inr {
+  background: oklch(0.25 0.05 145);
+  color: oklch(0.75 0.1 145);
+}
+[data-theme='dark'] .history-currency-aed {
+  background: oklch(0.25 0.05 228);
+  color: oklch(0.75 0.1 228);
+}
+
+/* ── Total cell ───────────────────────────────────────── */
+.history-total {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.history-total-sym {
+  font-size: 11px;
+  color: var(--muted);
+  margin-right: 2px;
+}
+
+/* ── Action buttons ───────────────────────────────────── */
+.history-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.history-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms, color 150ms;
+  font-family: inherit;
+  color: var(--text);
+}
+.history-action-btn + .history-action-btn { margin-left: 6px; }
+
+.history-load-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.history-delete-btn { color: var(--muted); }
+.history-delete-btn:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.history-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Loading skeletons ────────────────────────────────── */
+.history-loading {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.history-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.history-skeleton-row:last-child { border-bottom: none; }
+.skeleton {
+  background: var(--panel);
+  border-radius: 6px;
+  height: 14px;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+.skeleton-num  { width: 80px; flex-shrink: 0; }
+.skeleton-name { width: 140px; flex-shrink: 0; }
+.skeleton-subj { flex: 1; }
+.skeleton-amt  { width: 90px; flex-shrink: 0; }
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ── Error state ──────────────────────────────────────── */
+.history-error {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--muted);
+}
+.history-error-detail {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--faint);
+}
+.history-retry-btn {
+  margin-top: 18px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 150ms;
+}
+.history-retry-btn:hover { background: var(--hover); }
+
+/* ── Empty state ──────────────────────────────────────── */
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 72px 24px;
+  color: var(--faint);
+}
+.history-empty svg { margin-bottom: 16px; }
+.history-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.history-empty-sub {
+  font-size: 14px;
+  color: var(--faint);
+  max-width: 340px;
+}
+
+/* ── hide-mobile helper (used by thead th / marquee cells) */
+.hide-mobile { /* no-op at desktop */ }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE — card layout (≤ 640px)
+   Each <tr> becomes a self-contained card.
+   <td> renders as a labelled row inside the card using
+   the data-label attribute.
+══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .history-page { padding: 16px 14px 72px; }
+  .history-title { font-size: 19px; }
+  .history-header { margin-bottom: 20px; }
+  .history-tabs   { margin-bottom: 18px; }
+
+  /* Filters */
+  .history-filters       { gap: 10px; margin-bottom: 18px; }
+  .history-filter-row    { flex-direction: column; align-items: stretch; gap: 10px; }
+  .history-sort-wrap     { width: 100%; }
+  .history-sort-select   { width: 100%; }
+
+  /* ── Card wrapper ── */
+  .history-table-wrap {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Hide the real table header */
+  .history-table thead { display: none; }
+
+  /* Table → block stack */
+  .history-table,
+  .history-table tbody { display: block; }
+
+  /* Each row = a card */
+  .history-table tbody tr {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    transition: box-shadow 150ms;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  .history-table tbody tr:hover {
+    background: var(--surface);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+
+  /* Each td = a labelled row */
+  .history-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 14px;
+    border: none;
+    gap: 8px;
+  }
+
+  /* Label from data-label attr */
+  .history-table td[data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+
+  /* Invoice # — prominent at top */
+  .history-table td.history-inv-num {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    justify-content: flex-start;
+    gap: 0;
+  }
+  .history-table td.history-inv-num::before { display: none; }
+
+  /* Total — right-aligned value */
+  .history-table td.history-total {
+    text-align: right;
+    justify-content: space-between;
+    font-size: 15px;
+  }
+
+  /* Actions — full-width row of buttons */
+  .history-table td.history-actions {
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+    white-space: normal;
+    gap: 8px;
+  }
+  .history-table td.history-actions::before { display: none; }
+
+  .history-action-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .history-action-btn + .history-action-btn { margin-left: 0; }
+
+  /* Marquee cell — override to block */
+  .history-table td.marquee-cell {
+    display: flex;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .history-table td.marquee-cell .marquee-wrap {
+    width: max-content;
+  }
+
+  /* Hide subject on mobile cards */
+  .history-table td.hide-mobile { display: none; }
+
+  /* Draft auto-saved timestamp — smaller */
+  .history-table td.draft-saved-at {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted);
+    justify-content: flex-start;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+    gap: 0;
+  }
+  .history-table td.draft-saved-at::before { display: none; }
+
+  /* Loading skeleton — simpler on mobile */
+  .history-skeleton-row {
+    gap: 10px;
+    padding: 14px 16px;
+  }
+  .skeleton-name { width: 100px; }
+}
+
+/* ── Medium tablet tweak (641–900px) ──────────────────── */
+@media (min-width: 641px) and (max-width: 900px) {
+  .history-page { padding: 24px 18px 72px; }
+  .history-table th,
+  .history-table td { padding: 11px 12px; }
+  .history-action-btn { padding: 5px 8px; font-size: 12px; }
+  .marquee-cell { max-width: 130px; }
+}
+
+/* ── Small filter adjustments (≤ 480px) ──────────────── */
+@media (max-width: 480px) {
+  .history-page .currency-option { padding: 5px 10px; font-size: 12px; }
+}

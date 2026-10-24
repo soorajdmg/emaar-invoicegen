@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import GenerateInvoiceButton from './generateInvoice';
 import Navbar from './navbar';
 import './invoiceForm.css';
+import { useAutoSave, LS_KEY } from '../hooks/useAutoSave';
+import { getDraft, getDraftById, getInvoice, saveInvoice, updateInvoice, clearDraft, saveDraftSnapshot } from '../api/invoiceApi';
 
 const MAX_ITEMS = 5;
 
@@ -189,6 +192,112 @@ const InvoiceForm = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [viewportW, setViewportW]     = useState(window.innerWidth);
   const [openItemId, setOpenItemId]   = useState(null);
+  const [savedInvoiceId, setSavedInvoiceId] = useState(null);
+  const [saveStatus, setSaveStatus]         = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Auto-save draft on every change (debounced)
+  useAutoSave(data);
+
+  // Periodic snapshot every 2 minutes — saved to drafts table
+  const dataRef = useRef(data);
+  const [autoSaveStatus, setAutoSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
+  useEffect(() => { dataRef.current = data; }, [data]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAutoSaveStatus('saving');
+      saveDraftSnapshot(dataRef.current)
+        .then(() => {
+          setAutoSaveStatus('saved');
+          setTimeout(() => setAutoSaveStatus('idle'), 2500);
+        })
+        .catch(() => setAutoSaveStatus('idle'));
+    }, 2 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // On mount: restore from saved invoice, draft snapshot, or current draft
+  useEffect(() => {
+    // Restore from a draft snapshot (from Drafts tab)
+    const loadDraft = location.state?.loadDraft;
+    if (loadDraft?.id) {
+      getDraftById(loadDraft.id).then(draft => {
+        const { id: _id, savedAt: _savedAt, ...invoiceData } = draft;
+        setData({ ...initialFormState, ...invoiceData });
+        if (invoiceData.items?.length) {
+          uid = Math.max(...invoiceData.items.map(i => i.id), uid);
+        }
+      }).catch(() => {});
+      return;
+    }
+
+    const loadInvoiceId = location.state?.loadInvoiceId;
+    if (loadInvoiceId) {
+      getInvoice(loadInvoiceId).then(invoice => {
+        setData({
+          invoiceNumber: invoice.invoiceNumber,
+          date: invoice.date,
+          customerName: invoice.customerName,
+          address: invoice.address,
+          subject: invoice.subject,
+          notes: invoice.notes,
+          currency: invoice.currency,
+          items: invoice.items,
+        });
+        setSavedInvoiceId(invoice.id);
+        uid = Math.max(...invoice.items.map(i => i.id), uid);
+      }).catch(() => {});
+      return;
+    }
+
+    // Try API draft first, fall back to localStorage
+    getDraft().then(draft => {
+      if (draft && !draft.empty) {
+        const { _updatedAt, ...invoiceData } = draft;
+        setData(invoiceData);
+        if (invoiceData.items?.length) {
+          uid = Math.max(...invoiceData.items.map(i => i.id), uid);
+        }
+      } else {
+        // localStorage fallback
+        const stored = localStorage.getItem(LS_KEY);
+        if (stored) {
+          try {
+            const { _savedAt, ...invoiceData } = JSON.parse(stored);
+            setData(invoiceData);
+            if (invoiceData.items?.length) {
+              uid = Math.max(...invoiceData.items.map(i => i.id), uid);
+            }
+          } catch { /* ignore */ }
+        }
+      }
+    }).catch(() => {
+      // API unavailable — try localStorage
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored) {
+        try {
+          const { _savedAt, ...invoiceData } = JSON.parse(stored);
+          setData(invoiceData);
+          if (invoiceData.items?.length) {
+            uid = Math.max(...invoiceData.items.map(i => i.id), uid);
+          }
+        } catch { /* ignore */ }
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // beforeunload: sync localStorage save as last resort
+  useEffect(() => {
+    const handler = () => {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify({ ...data, _savedAt: Date.now() }));
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [data]);
 
   useEffect(() => {
     const onResize = () => setViewportW(window.innerWidth);
@@ -236,6 +345,40 @@ const InvoiceForm = () => {
     setTimeout(() => setGenState('idle'), 2600);
   };
 
+  /* save invoice */
+  const handleSave = async () => {
+    if (saveStatus === 'saving') return;
+    setSaveStatus('saving');
+    try {
+      const payload = {
+        invoiceNumber: data.invoiceNumber,
+        date: data.date,
+        customerName: data.customerName,
+        address: data.address,
+        subject: data.subject,
+        notes: data.notes,
+        currency: data.currency,
+        items: data.items,
+      };
+      if (savedInvoiceId) {
+        await updateInvoice(savedInvoiceId, payload);
+      } else {
+        const saved = await saveInvoice(payload);
+        setSavedInvoiceId(saved.id);
+      }
+      // Clear draft after explicit save
+      clearDraft().catch(() => {});
+      localStorage.removeItem(LS_KEY);
+      setSaveStatus('saved');
+      showToast(savedInvoiceId ? 'Invoice updated' : 'Invoice saved');
+      setTimeout(() => setSaveStatus('idle'), 2600);
+    } catch {
+      setSaveStatus('error');
+      showToast('Save failed — check your connection');
+      setTimeout(() => setSaveStatus('idle'), 2600);
+    }
+  };
+
   /* new invoice */
   const handleNewInvoice = () => {
     const snap = { ...data };
@@ -244,6 +387,7 @@ const InvoiceForm = () => {
       ? data.invoiceNumber.slice(0,m.index) + String(+m[1]+1).padStart(m[1].length,'0') + data.invoiceNumber.slice(m.index+m[1].length)
       : '';
     setUndoSnap(snap);
+    setSavedInvoiceId(null);
     setData({ ...initialFormState, invoiceNumber: nextNum, date: new Date().toISOString().slice(0,10) });
     showToast('Started a new invoice', true);
   };
@@ -264,6 +408,10 @@ const InvoiceForm = () => {
         invoiceData={data}
         onGenerate={handleGenerate}
         onNewInvoice={handleNewInvoice}
+        onSave={handleSave}
+        saveStatus={saveStatus}
+        autoSaveStatus={autoSaveStatus}
+        onNavigateHistory={() => navigate('/invoices')}
         genState={genState}
         totalText={totalText}
         showPreviewBtn={showPreviewBtn}

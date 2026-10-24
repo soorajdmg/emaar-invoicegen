@@ -41,16 +41,35 @@ const EyeOffIcon = () => (
     <path d="M3 3l18 18"/>
   </svg>
 );
+const SaveIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+    <path d="M17 21v-8H7v8M7 3v5h8"/>
+  </svg>
+);
+const HistoryIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.36 2.64L3 8"/>
+    <path d="M3 3v5h5"/>
+    <path d="M12 7v5l4 2"/>
+  </svg>
+);
 
 const Navbar = ({
   invoiceData,
   onGenerate,
   onNewInvoice,
+  onSave,
+  saveStatus,
+  autoSaveStatus = 'idle',
+  onNavigateHistory,
   genState,
   totalText,
   showPreviewBtn,
   previewOpen,
   onTogglePreview,
+  minimal = false,
+  pageLabel = 'Create invoice',
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -75,13 +94,31 @@ const Navbar = ({
   return (
     <>
       <header className="navbar">
-        {/* Brand */}
+        {/* Brand breadcrumb */}
         <div className="brand">
-          <div className="brand-plate" onClick={onNewInvoice} title="New invoice">
+          <a
+            className="brand-plate"
+            href="https://www.behance.net/prmurugaraj"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="behance.net/prmurugaraj"
+          >
             <span className="brand-name">murugaraj</span>
             <span className="brand-sub">Creative Retoucher</span>
+          </a>
+          <div className="brand-path">
+            {onNavigateHistory && !minimal ? (
+              <button className="brand-label brand-label-link" onClick={onNavigateHistory}>Invoices</button>
+            ) : (
+              <span className="brand-label">Invoices</span>
+            )}
+            {!minimal && (
+              <>
+                <span className="brand-sep">/</span>
+                <span className="brand-label">{pageLabel}</span>
+              </>
+            )}
           </div>
-          <span className="brand-label">Invoice generator</span>
         </div>
 
         {/* Actions */}
@@ -92,7 +129,7 @@ const Navbar = ({
           </button>
 
           {/* Preview toggle — only shown when not wide enough for side-by-side */}
-          {showPreviewBtn && (
+          {!minimal && showPreviewBtn && (
             <button
               className={`nav-btn${previewOpen ? ' nav-btn-active' : ''}`}
               onClick={onTogglePreview}
@@ -103,32 +140,54 @@ const Navbar = ({
             </button>
           )}
 
-          {/* New invoice */}
-          <button className="nav-btn" onClick={onNewInvoice} title="New invoice">
-            <NewInvoiceIcon />
-            <span className="hide-mobile">New invoice</span>
-          </button>
+          {onNewInvoice && (
+            <button className="nav-btn" onClick={onNewInvoice} title="New invoice">
+              <NewInvoiceIcon />
+              <span className="hide-mobile">New invoice</span>
+            </button>
+          )}
 
-          {/* Generate — desktop only */}
-          <button
-            className="nav-btn-generate hide-mobile"
-            onClick={onGenerate}
-            disabled={genState !== 'idle'}
-          >
-            {genState === 'loading' ? (
-              <span className="spin" />
-            ) : genState === 'done' ? (
-              <CheckIcon />
-            ) : (
-              <DownloadIcon />
-            )}
-            <span>{genLabel}</span>
-          </button>
+          {!minimal && (
+            <>
+              {/* Save */}
+              <button
+                className="nav-btn hide-mobile"
+                onClick={onSave}
+                disabled={saveStatus === 'saving'}
+                title="Save invoice"
+              >
+                {saveStatus === 'saving' || autoSaveStatus === 'saving' ? <span className="spin" /> : <SaveIcon />}
+                <span>
+                  {saveStatus === 'saving'      ? 'Saving…'
+                  : saveStatus === 'saved'       ? 'Saved'
+                  : autoSaveStatus === 'saving'  ? 'Auto-saving…'
+                  : autoSaveStatus === 'saved'   ? 'Auto-saved'
+                  :                               'Save'}
+                </span>
+              </button>
+
+              {/* Generate — desktop only */}
+              <button
+                className="nav-btn-generate hide-mobile"
+                onClick={onGenerate}
+                disabled={genState !== 'idle'}
+              >
+                {genState === 'loading' ? (
+                  <span className="spin" />
+                ) : genState === 'done' ? (
+                  <CheckIcon />
+                ) : (
+                  <DownloadIcon />
+                )}
+                <span>{genLabel}</span>
+              </button>
+            </>
+          )}
         </div>
       </header>
 
       {/* Mobile sticky footer */}
-      <div className="mobile-footer show-mobile">
+      {!minimal && <div className="mobile-footer show-mobile">
         <div className="mobile-total">
           <span className="mobile-total-label">Total due ({invoiceData?.currency})</span>
           <span className="mobile-total-amount">{totalText}</span>
@@ -147,7 +206,7 @@ const Navbar = ({
           )}
           <span>{genState === 'loading' ? 'Generating…' : genState === 'done' ? 'Done' : 'Generate'}</span>
         </button>
-      </div>
+      </div>}
     </>
   );
 };
