@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "fontkit": "^1.7.2",
+    "pdf-lib": "^1.17.1"
+  }
+}

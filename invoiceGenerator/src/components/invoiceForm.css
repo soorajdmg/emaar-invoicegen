@@ -1,0 +1,597 @@
+/* ── Two-column layout wrapper ───────────────────────── */
+.invoice-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(14px, 2.5vw, 28px) clamp(12px, 2.5vw, 32px) 40px;
+  box-sizing: border-box;
+}
+
+/* ── Form column ─────────────────────────────────────── */
+.invoice-page {
+  flex: 1 1 560px;
+  min-width: 0;
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn .4s ease-out;
+}
+
+/* ── Preview aside ───────────────────────────────────── */
+.preview-aside {
+  flex: 1 1 460px;
+  min-width: 0;
+  max-width: 760px;
+  margin: 0 auto;
+  position: sticky;
+  top: 82px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0 20px 24px;
+}
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.preview-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-back-btn {
+  width: 36px;
+  height: 36px;
+  margin-left: -6px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 140ms;
+}
+.preview-back-btn:hover { background: var(--hover); }
+
+.preview-live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--accent-ink);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.preview-pdf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 14px;
+  white-space: nowrap;
+  flex: none;
+}
+
+/* ── A4 canvas ───────────────────────────────────────── */
+.preview-canvas {
+  position: relative;
+  aspect-ratio: 595.44 / 841.92;
+  container-type: inline-size;
+  background: #fff url('/assets/invoice-letterhead.png') center / 100% 100% no-repeat;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 32px -12px rgba(0,0,0,.22);
+  overflow: hidden;
+  color: #111;
+  font-family: 'Roboto Mono', ui-monospace, monospace;
+  letter-spacing: 0;
+}
+
+/* shared text node inside canvas */
+.pv-text {
+  position: absolute;
+  font-size: 1.679cqw;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pv-multiline {
+  white-space: pre-line;
+  line-height: 1.8;
+}
+
+.pv-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pv-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: 1.511cqw;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pv-total {
+  font-size: 1.847cqw;
+}
+
+.pv-words {
+  font-size: 1.511cqw;
+  position: absolute;
+}
+
+.pv-notes {
+  font-size: 1.511cqw;
+  line-height: 1.45;
+  white-space: pre-line;
+  max-height: 3.6%;
+  overflow: hidden;
+}
+
+/* ── Card section ─────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* ── Currency pill toggle ─────────────────────────────── */
+.currency-pill {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.currency-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1px var(--border);
+  transition: transform 240ms cubic-bezier(.3,.7,.2,1);
+}
+
+.currency-thumb.aed {
+  transform: translateX(100%);
+}
+
+.currency-option {
+  position: relative;
+  z-index: 1;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 180ms;
+  white-space: nowrap;
+}
+
+.currency-option.active {
+  color: var(--text);
+}
+
+/* ── Detail grid ─────────────────────────────────────── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px 16px;
+}
+
+.field-full { grid-column: 1 / -1; }
+
+/* ── Labels & inputs ─────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 400;
+}
+
+.field-input {
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+
+.field-input:hover  { border-color: var(--border-strong); }
+.field-input:focus  { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+
+/* monospace variant (invoice number, qty, price) */
+.field-input-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 15px;
+}
+
+/* ── Billed-to compound card ─────────────────────────── */
+.billed-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  transition: border-color 140ms;
+}
+
+.billed-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+.billed-fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.billed-name-input {
+  height: 30px;
+  padding: 0 6px;
+  margin-left: -6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  outline: none;
+  width: 100%;
+}
+
+.billed-name-input:focus { background: var(--surface2); }
+
+.billed-address-input {
+  padding: 4px 6px;
+  margin-left: -6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 72px;
+}
+
+.billed-address-input:focus {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.billed-edit-icon {
+  color: var(--muted);
+  flex: none;
+  margin: 12px 6px 0 0;
+}
+
+/* ── Items table ─────────────────────────────────────── */
+.items-inner {
+  background: var(--surface2);
+  border-radius: 14px;
+  padding: 6px 8px 8px;
+}
+
+.items-col-header {
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr) 78px 128px 132px 40px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 10px 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.items-col-header span:nth-child(3),
+.items-col-header span:nth-child(4),
+.items-col-header span:nth-child(5) {
+  text-align: right;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0,1fr) 78px 128px 132px 40px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: background 140ms;
+}
+
+.item-row:hover { background: var(--row-hover); }
+
+.item-idx {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--faint);
+}
+
+.item-input {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+
+.item-input:hover { border-color: var(--border-strong); }
+.item-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+
+.item-input-num {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 14px;
+  text-align: right;
+}
+
+.item-total {
+  text-align: right;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-delete-btn {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--danger);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 140ms;
+  flex: none;
+}
+
+.item-delete-btn:hover { background: var(--danger-soft); }
+
+/* ── Items footer row ────────────────────────────────── */
+.items-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.add-item-btn {
+  height: 44px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  color: var(--accent-ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 140ms, color 140ms;
+}
+
+.add-item-btn:hover { background: var(--accent-soft); }
+
+.add-item-btn:disabled {
+  color: var(--faint);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.rows-used {
+  margin-left: auto;
+  padding-right: 10px;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ── Total strip ─────────────────────────────────────── */
+.total-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px 24px;
+  padding: 20px 4px 0;
+}
+
+.total-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.total-label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.total-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: -0.03em;
+}
+
+.total-sym {
+  font-size: 22px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.total-num {
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* ── Notes section ───────────────────────────────────── */
+.notes-textarea {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.55;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+
+.notes-textarea:hover { border-color: var(--border-strong); }
+.notes-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+
+/* ── Enter hint ──────────────────────────────────────── */
+.enter-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.kbd {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+}
+
+/* ── Item count badge ────────────────────────────────── */
+.item-count-badge {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--surface2);
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  .items-col-header  { display: none; }
+
+  .item-row {
+    grid-template-columns: 20px minmax(0,1fr) 40px;
+    grid-template-rows: auto auto;
+    gap: 8px;
+  }
+
+  .item-input.item-input-num { grid-column: 2; }
+  .item-total                { grid-column: 2; text-align: left; }
+  .item-delete-btn           { grid-row: 1; grid-column: 3; }
+
+  .enter-hint { display: none; }
+}
+
+/* ── Show/hide helpers ───────────────────────────────── */
+.hide-mobile { display: inline-flex; }
+.show-mobile { display: none; }
+
+@media (max-width: 700px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
+}
