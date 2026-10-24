@@ -405,7 +405,7 @@ const InvoiceForm = () => {
             </div>
           </div>
           <div className="toast-wrapper-mobile show-mobile">
-            <div className="toast toast-mobile">
+            <div className={`toast toast-mobile${toast.canUndo ? ' toast-has-undo' : ''}`}>
               <span>{toast.text}</span>
               {toast.canUndo && <button className="toast-undo-btn" onClick={handleUndo}>Undo</button>}
             </div>
