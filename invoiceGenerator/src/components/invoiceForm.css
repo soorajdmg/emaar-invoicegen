@@ -276,7 +276,11 @@
 }
 
 input[type="date"].field-input {
-  padding-right: 8px; /* prevent calendar icon clipping on mobile */
+  padding-right: 8px;
+  /* Prevent the native date widget from overflowing its container */
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
 }
 
 .field-input:hover  { border-color: var(--border-strong); }
@@ -634,6 +638,11 @@ input[type="date"].field-input {
 
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width: 700px) {
+  /* Force single-column layout so date input never overflows */
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
   .enter-hint { display: none; }
 
   /* Add bottom padding so fixed footer doesn't cover the last card */
