@@ -28,12 +28,19 @@
   min-width: 0;
   max-width: 760px;
   margin: 0 auto;
+  align-self: flex-start;  /* must be set for position:sticky inside a flex row */
   position: sticky;
-  top: 82px;
+  top: calc(var(--navbar-h) + clamp(14px, 2.5vw, 28px)); /* navbar + layout top gap */
+  /* Independent scroller */
+  height: calc(100dvh - var(--navbar-h) - clamp(14px, 2.5vw, 28px) - clamp(14px, 2.5vw, 28px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 0 20px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .preview-head {
