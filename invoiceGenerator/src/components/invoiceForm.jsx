@@ -61,6 +61,16 @@ const TrashIcon = () => (
     <path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/>
   </svg>
 );
+const MinusIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+    <path d="M5 12h14"/>
+  </svg>
+);
+const PlusIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+    <path d="M12 5v14M5 12h14"/>
+  </svg>
+);
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="billed-edit-icon">
     <path d="M4 20h4L19 9l-4-4L4 16z"/>
@@ -178,6 +188,7 @@ const InvoiceForm = () => {
   const [undoSnap, setUndoSnap] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [viewportW, setViewportW]     = useState(window.innerWidth);
+  const [openItemId, setOpenItemId]   = useState(null);
 
   useEffect(() => {
     const onResize = () => setViewportW(window.innerWidth);
@@ -316,12 +327,13 @@ const InvoiceForm = () => {
                 </span>
               </div>
               <div className="card-body">
-                <div className="items-inner">
-                  <div className="items-col-header hide-mobile">
-                    <span>#</span><span>Description</span>
-                    <span style={{ textAlign:'right' }}>Qty</span>
-                    <span style={{ textAlign:'right' }}>Price</span>
-                    <span style={{ textAlign:'right' }}>Total</span>
+                {/* ── Desktop table (hidden on mobile) ── */}
+                <div className="items-inner hide-on-mobile">
+                  <div className="items-col-header">
+                    <span>#</span><span>Item description</span>
+                    <span>Qty</span>
+                    <span>Rate</span>
+                    <span style={{ textAlign:'right' }}>Amount</span>
                     <span />
                   </div>
                   {activeItems.map((item, i) => (
@@ -330,9 +342,19 @@ const InvoiceForm = () => {
                       <input className="item-input" placeholder="Item or service" value={item.description}
                         onChange={e => patchItem(item.id, { description: e.target.value })}
                         onKeyDown={e => { if (e.key==='Enter') { e.preventDefault(); addItem(); } }} />
-                      <input className="item-input item-input-num" inputMode="decimal" placeholder="0" value={item.quantity}
-                        onChange={e => patchItem(item.id, { quantity: e.target.value })}
-                        onKeyDown={e => { if (e.key==='Enter') { e.preventDefault(); addItem(); } }} />
+                      <div className="qty-stepper">
+                        <button className="qty-btn" tabIndex={-1}
+                          onClick={() => patchItem(item.id, { quantity: Math.max(1, (Number(item.quantity)||1) - 1) })}>
+                          <MinusIcon />
+                        </button>
+                        <input className="item-input item-input-num qty-input" inputMode="decimal" placeholder="1" value={item.quantity}
+                          onChange={e => patchItem(item.id, { quantity: e.target.value })}
+                          onKeyDown={e => { if (e.key==='Enter') { e.preventDefault(); addItem(); } }} />
+                        <button className="qty-btn" tabIndex={-1}
+                          onClick={() => patchItem(item.id, { quantity: (Number(item.quantity)||0) + 1 })}>
+                          <PlusIcon />
+                        </button>
+                      </div>
                       <input className="item-input item-input-num" inputMode="decimal" placeholder="0.00" value={item.price}
                         onChange={e => patchItem(item.id, { price: e.target.value })}
                         onKeyDown={e => { if (e.key==='Enter') { e.preventDefault(); addItem(); } }} />
@@ -351,6 +373,108 @@ const InvoiceForm = () => {
                     </button>
                     <span className="rows-used">
                       {liveCount >= MAX_ITEMS ? 'Max 5 rows · paper limit' : `${liveCount} / 5 rows`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* ── Mobile card stack (hidden on desktop) ── */}
+                <div className="mobile-items show-on-mobile">
+                  <div className="mobile-items-list">
+                    {activeItems.map((item, i) => {
+                      const isOpen = openItemId === item.id;
+                      const lineTotal = (Number(item.quantity)||0) * (Number(item.price)||0);
+                      const calc = item.quantity && item.price
+                        ? `${item.quantity} × ${sym}${Number(item.price).toFixed(2)}`
+                        : 'Tap to edit';
+                      return (
+                        <div key={item.id} className={`mobile-item-card${isOpen ? ' open' : ''}`}>
+                          {!isOpen ? (
+                            /* Collapsed */
+                            <button className="mobile-item-collapsed" onClick={() => setOpenItemId(item.id)}>
+                              <span className="mobile-item-badge">{i + 1}</span>
+                              <span className="mobile-item-info">
+                                <span className="mobile-item-title">
+                                  {item.description || 'New item'}
+                                </span>
+                                <span className="mobile-item-calc">{calc}</span>
+                              </span>
+                              <span className="mobile-item-linetotal">
+                                {sym}{fmt(lineTotal, data.currency)}
+                              </span>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flex:'none', color:'var(--faint)' }}>
+                                <path d="M9 6l6 6-6 6"/>
+                              </svg>
+                            </button>
+                          ) : (
+                            /* Expanded */
+                            <div className="mobile-item-expanded">
+                              <div className="mobile-item-exp-header">
+                                <span className="mobile-item-exp-label">Item {i + 1}</span>
+                                <button className="mobile-item-remove-btn"
+                                  onClick={() => { removeItem(item.id); setOpenItemId(null); }}
+                                  disabled={liveCount <= 1}>
+                                  <TrashIcon />Remove
+                                </button>
+                              </div>
+
+                              <label className="mobile-field">
+                                <span className="mobile-field-label">Description</span>
+                                <input className="mobile-field-input" placeholder="Item or service"
+                                  value={item.description}
+                                  onChange={e => patchItem(item.id, { description: e.target.value })}
+                                  enterKeyHint="next" />
+                              </label>
+
+                              <div className="mobile-field">
+                                <span className="mobile-field-label">Quantity</span>
+                                <div className="mobile-qty-stepper">
+                                  <button className="mobile-qty-btn"
+                                    onClick={() => patchItem(item.id, { quantity: Math.max(1, (Number(item.quantity)||1) - 1) })}>
+                                    −
+                                  </button>
+                                  <input className="mobile-qty-input" inputMode="decimal" enterKeyHint="next"
+                                    placeholder="0" value={item.quantity}
+                                    onChange={e => patchItem(item.id, { quantity: e.target.value })} />
+                                  <button className="mobile-qty-btn"
+                                    onClick={() => patchItem(item.id, { quantity: (Number(item.quantity)||0) + 1 })}>
+                                    +
+                                  </button>
+                                </div>
+                              </div>
+
+                              <label className="mobile-field">
+                                <span className="mobile-field-label">Price per unit</span>
+                                <div className="mobile-price-wrap">
+                                  <span className="mobile-price-sym">{sym}</span>
+                                  <input className="mobile-price-input" inputMode="decimal" enterKeyHint="done"
+                                    placeholder="0.00" value={item.price}
+                                    onChange={e => patchItem(item.id, { price: e.target.value })} />
+                                </div>
+                              </label>
+
+                              <div className="mobile-item-footer">
+                                <div className="mobile-item-linetotal-block">
+                                  <span className="mobile-item-linetotal-label">Line total</span>
+                                  <span className="mobile-item-linetotal-value">
+                                    {sym}{fmt(lineTotal, data.currency)}
+                                  </span>
+                                </div>
+                                <button className="mobile-item-done-btn" onClick={() => setOpenItemId(null)}>
+                                  Done
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="items-footer">
+                    <button className="add-item-btn" onClick={() => { addItem(); }} disabled={liveCount >= MAX_ITEMS}>
+                      <AddLineIcon />Add new line
+                    </button>
+                    <span className="rows-used">
+                      {liveCount >= MAX_ITEMS ? 'Max 5 rows' : `${liveCount} / 5`}
                     </span>
                   </div>
                 </div>
