@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Mulish:wght@300;400&display=swap');
+
+/* ── Theme tokens ─────────────────────────────────────── */
+:root {
+  /* Light */
+  --bg:           #F3F3F1;
+  --surface:      #FFFFFF;
+  --surface2:     #F6F6F4;
+  --panel:        #ECECEA;
+  --row-hover:    #EEEEEB;
+  --hover:        #FAFAF9;
+  --border:       #E6E6E3;
+  --border-strong:#CFCFCB;
+  --text:         #151615;
+  --muted:        #6B6D6A;
+  --faint:        #A0A29E;
+  --accent:       oklch(0.57 0.12 232);
+  --accent-ink:   oklch(0.5  0.11 232);
+  --accent-soft:  oklch(0.95 0.03 228);
+  --ring:         oklch(0.69 0.13 228 / .22);
+  --danger:       #E5484D;
+  --danger-soft:  #FDECEC;
+  --toast-bg:     #151615;
+  --toast-ink:    #F3F3F1;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg:           #0C0D0C;
+  --surface:      #151615;
+  --surface2:     #1B1C1B;
+  --panel:        #111211;
+  --row-hover:    #222322;
+  --hover:        #1D1E1D;
+  --border:       #262826;
+  --border-strong:#3A3C3A;
+  --text:         #EDEEEC;
+  --muted:        #A2A5A0;
+  --faint:        #6C6F6B;
+  --accent:       oklch(0.57 0.12 232);
+  --accent-ink:   oklch(0.8  0.11 228);
+  --accent-soft:  oklch(0.3  0.05 230);
+  --ring:         oklch(0.69 0.13 228 / .3);
+  --danger:       #FF6B70;
+  --danger-soft:  rgba(255,107,112,.12);
+  --toast-bg:     #EDEEEC;
+  --toast-ink:    #151615;
+  color-scheme: dark;
+}
+
+/* ── Reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  transition: background 200ms, color 200ms;
+}
+
+input::placeholder,
+textarea::placeholder { color: var(--faint); }
+
+input[type=date]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: .6;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ivspin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ivtoast {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}

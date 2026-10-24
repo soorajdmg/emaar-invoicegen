@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;family=Mulish:wght@300;400&amp;family=Roboto+Mono:wght@400;500;700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0}
+a{color:#1488b0;text-decoration:underline}a:hover{opacity:.8}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6}
+@keyframes ivspin{to{transform:rotate(360deg)}}
+@keyframes ivtoast{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="{{ rootStyle }}">
+
+  <header style="position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,2.5vw,32px);background:var(--bg);border-bottom:1px solid var(--border)">
+    <div style="display:flex;align-items:center;gap:16px;min-width:0;align-self:stretch;margin:-14px 0">
+      <div style="align-self:stretch;margin-bottom:10px;border-radius:0 0 4px 4px;display:flex;flex-direction:column;justify-content:center;gap:1px;padding:4px 18px 0;background:#35B0D7;color:#fff;font-family:'Mulish','Avenir Next','Avenir',sans-serif;font-weight:300;white-space:nowrap;flex:none">
+        <span style="font-size:24px;line-height:1.05;letter-spacing:.09em">murugaraj</span>
+        <span style="font-size:11.5px;line-height:1.2;letter-spacing:.12em">Creative Retoucher</span>
+      </div>
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;color:var(--muted);white-space:nowrap">Invoice generator</span></sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">1</span></sc-if>
+      <button onClick="{{ toggleTheme }}" title="Toggle dark mode" style="width:44px;height:44px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;cursor:pointer;display:grid;place-items:center;transition:background 140ms,border-color 140ms" style-hover="border-color:var(--borderStrong);background:var(--hover)">
+        <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></sc-if>
+        <sc-if value="{{ light }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></sc-if>
+      </button>
+      <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">8</span></sc-if>
+      <sc-if value="{{ showPreviewBtn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ togglePreview }}" title="Toggle invoice preview" aria-pressed="{{ previewOpen }}" style="{{ previewBtnStyle }}" style-hover="border-color:var(--borderStrong)">
+          <sc-if value="{{ previewClosed }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+          <sc-if value="{{ previewOpen }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle><path d="M3 3l18 18"></path></svg></sc-if>
+          <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span>Preview</span></sc-if>
+        </button>
+      </sc-if>
+      <button onClick="{{ newInvoice }}" title="New invoice" style="height:44px;padding:0 14px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;font:inherit;font-size:15px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;transition:background 140ms,border-color 140ms" style-hover="border-color:var(--borderStrong);background:var(--hover)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M12 11v6M9 14h6"></path></svg>
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}"><span>New invoice</span></sc-if>
+      </button>
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">7</span></sc-if>
+        <button onClick="{{ generate }}" style="{{ genStyle }}" style-hover="filter:brightness(1.06)" style-active="transform:scale(.97)">
+          <sc-if value="{{ genIdle }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg></sc-if>
+          <sc-if value="{{ genLoading }}" hint-placeholder-val="{{ false }}"><span style="width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:ivspin .7s linear infinite;box-sizing:border-box"></span></sc-if>
+          <sc-if value="{{ genDone }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+          <span>{{ genLabel }}</span>
+        </button>
+      </sc-if>
+    </div>
+  </header>
+
+  <main style="padding:clamp(14px,2.5vw,28px) clamp(12px,2.5vw,32px) 40px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:20px;max-width:1440px;margin:0 auto;box-sizing:border-box">
+
+    <sc-if value="{{ formVisible }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px;max-width:880px;margin:0 auto">
+
+      <section style="background:var(--surface);border:1px solid var(--border);border-radius:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)">
+          <h2 style="margin:0;font-size:19px;font-weight:500">Invoice detail</h2>
+          <div style="display:flex;align-items:center;gap:8px">
+            <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">2</span></sc-if>
+            <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:999px;background:var(--surface2);border:1px solid var(--border)">
+              <div style="{{ thumbStyle }}"></div>
+              <button onClick="{{ setINR }}" style="{{ inrStyle }}">₹ INR</button>
+              <button onClick="{{ setAED }}" style="{{ aedStyle }}">د.إ AED</button>
+            </div>
+          </div>
+        </div>
+        <div style="padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px 16px">
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:15px">Invoice number</span>
+            <input value="{{ number }}" onChange="{{ onNumber }}" placeholder="687686868" style="height:48px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-family:'Geist Mono',ui-monospace,monospace;font-size:15px;outline:none;box-sizing:border-box;width:100%;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:15px">Date</span>
+            <div style="position:relative">
+              <input type="date" value="{{ date }}" onChange="{{ onDate }}" style="position:relative;height:48px;padding:0 12px 0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;outline:none;box-sizing:border-box;width:100%;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+              
+            </div>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px;grid-column:1/-1">
+            <span style="font-size:15px">Billed to</span>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;border:1px solid var(--border);border-radius:14px;background:var(--surface)">
+              
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                <input value="{{ billTo }}" onChange="{{ onBillTo }}" placeholder="Customer name" style="height:30px;padding:0 6px;margin-left:-6px;border:0;border-radius:6px;background:transparent;color:var(--text);font:inherit;font-size:17px;font-weight:600;outline:none;width:100%;box-sizing:border-box" style-focus="background:var(--surface2)">
+                <textarea rows="3" value="{{ address }}" onChange="{{ onAddress }}" placeholder="Street, city, postcode, country" style="padding:4px 6px;margin-left:-6px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:15px;line-height:1.5;outline:none;width:100%;box-sizing:border-box;resize:vertical;min-height:72px" style-focus="background:var(--surface2);color:var(--text)"></textarea>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);flex:none;margin:12px 6px 0 0"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13.5 6.5l4 4"></path></svg>
+            </div>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:8px;grid-column:1/-1">
+            <span style="font-size:15px">Subject</span>
+            <input value="{{ subject }}" onChange="{{ onSubject }}" placeholder="What is this invoice for?" style="height:48px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;outline:none;box-sizing:border-box;width:100%;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+          </label>
+        </div>
+      </section>
+
+      <section style="background:var(--surface);border:1px solid var(--border);border-radius:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <h2 style="margin:0;font-size:19px;font-weight:500">Line items</h2>
+            <span style="font:500 12px/1 'Geist Mono',monospace;color:var(--muted);padding:5px 8px;border-radius:999px;background:var(--surface2)">{{ itemCount }}</span>
+            <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">3</span></sc-if>
+          </div>
+          <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+            <span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><span style="font:500 11px/1 'Geist Mono',monospace;padding:4px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:6px">↵ Enter</span>adds a row</span>
+          </sc-if>
+        </div>
+
+        <div style="padding:16px 20px 20px">
+          <div style="background:var(--surface2);border-radius:14px;padding:6px 8px 8px">
+
+            <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:24px minmax(0,1fr) 78px 128px 132px 40px;gap:10px;align-items:center;padding:10px 10px 8px;font-size:14px;color:var(--muted)">
+                <span>#</span><span>Description</span><span style="text-align:right">Qty</span><span style="text-align:right">Price</span><span style="text-align:right">Total</span>
+                <span style="display:flex;justify-content:center"><sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">4</span></sc-if></span>
+              </div>
+              <sc-for list="{{ items }}" as="item" hint-placeholder-count="3">
+                <div style="{{ item.anim }}">
+                  <div style="overflow:hidden;min-height:0">
+                    <div style="display:grid;grid-template-columns:24px minmax(0,1fr) 78px 128px 132px 40px;gap:10px;align-items:center;padding:6px 10px;border-radius:10px;transition:background 140ms" style-hover="background:var(--rowHover)">
+                      <span style="font:500 12px/1 'Geist Mono',monospace;color:var(--faint)">{{ item.idx }}</span>
+                      <input data-desc="{{ item.id }}" value="{{ item.desc }}" onChange="{{ item.onDesc }}" onKeyDown="{{ item.onKey }}" placeholder="Item or service" style="height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;outline:none;box-sizing:border-box;width:100%;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+                      <input inputMode="decimal" value="{{ item.qty }}" onChange="{{ item.onQty }}" onKeyDown="{{ item.onKey }}" placeholder="0" style="height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:'Geist Mono',monospace;font-size:14px;text-align:right;outline:none;box-sizing:border-box;width:100%;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+                      <input inputMode="decimal" value="{{ item.price }}" onChange="{{ item.onPrice }}" onKeyDown="{{ item.onKey }}" placeholder="0.00" style="height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:'Geist Mono',monospace;font-size:14px;text-align:right;outline:none;box-sizing:border-box;width:100%;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+                      <span style="text-align:right;font-family:'Geist Mono',monospace;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.total }}</span>
+                      <button onClick="{{ item.onRemove }}" title="Delete row" style="width:40px;height:40px;display:grid;place-items:center;border:0;background:transparent;color:var(--danger);border-radius:10px;cursor:pointer;transition:background 140ms" style-hover="background:var(--dangerSoft)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"></path></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;padding-top:2px">
+                <sc-for list="{{ items }}" as="item" hint-placeholder-count="3">
+                  <div style="{{ item.anim }}">
+                    <div style="overflow:hidden;min-height:0">
+                      <div style="{{ item.cardStyle }}">
+                        <sc-if value="{{ item.collapsed }}" hint-placeholder-val="{{ true }}">
+                          <button onClick="{{ item.onOpen }}" style="width:100%;min-height:64px;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;box-sizing:border-box">
+                            <span style="width:28px;height:28px;flex:none;border-radius:8px;background:var(--surface2);display:grid;place-items:center;font:500 12px/1 'Geist Mono',monospace;color:var(--muted)">{{ item.n }}</span>
+                            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                              <span style="{{ item.titleStyle }}">{{ item.title }}</span>
+                              <span style="font:400 13px/1.2 'Geist Mono',monospace;color:var(--muted)">{{ item.calc }}</span>
+                            </span>
+                            <span style="font:600 15px/1 'Geist Mono',monospace;white-space:nowrap">{{ item.total }}</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--faint)"><path d="M9 6l6 6-6 6"></path></svg>
+                          </button>
+                        </sc-if>
+                        <sc-if value="{{ item.expanded }}" hint-placeholder-val="{{ false }}">
+                          <div style="padding:14px;display:flex;flex-direction:column;gap:14px">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                              <span style="font-size:14px;font-weight:600;color:var(--muted)">Item {{ item.n }}</span>
+                              <button onClick="{{ item.onRemove }}" style="height:40px;padding:0 10px;margin-right:-6px;display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--danger);font:inherit;font-size:14px;font-weight:500;border-radius:10px;cursor:pointer" style-active="background:var(--dangerSoft)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"></path></svg>Remove</button>
+                            </div>
+                            <label style="display:flex;flex-direction:column;gap:6px">
+                              <span style="font-size:14px;color:var(--muted)">Description</span>
+                              <input data-desc="{{ item.id }}" value="{{ item.desc }}" onChange="{{ item.onDesc }}" enterKeyHint="next" placeholder="Item or service" style="height:52px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font:inherit;font-size:16px;outline:none;box-sizing:border-box;width:100%" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+                            </label>
+                            <div style="display:flex;flex-direction:column;gap:6px">
+                              <span style="font-size:14px;color:var(--muted)">Quantity</span>
+                              <div style="display:grid;grid-template-columns:52px minmax(0,1fr) 52px;height:52px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)">
+                                <button onClick="{{ item.onDec }}" title="Decrease" style="border:0;border-right:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:22px;line-height:1;cursor:pointer" style-active="background:var(--rowHover)">−</button>
+                                <input inputMode="decimal" enterKeyHint="next" value="{{ item.qty }}" onChange="{{ item.onQty }}" placeholder="0" style="min-width:0;border:0;background:transparent;color:var(--text);font-family:'Geist Mono',monospace;font-size:17px;font-weight:500;text-align:center;outline:none">
+                                <button onClick="{{ item.onInc }}" title="Increase" style="border:0;border-left:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:22px;line-height:1;cursor:pointer" style-active="background:var(--rowHover)">+</button>
+                              </div>
+                            </div>
+                            <label style="display:flex;flex-direction:column;gap:6px">
+                              <span style="font-size:14px;color:var(--muted)">Price per unit</span>
+                              <div style="position:relative">
+                                <span style="position:absolute;left:14px;top:0;height:52px;display:flex;align-items:center;font:500 15px/1 'Geist Mono',monospace;color:var(--muted);pointer-events:none">{{ symbol }}</span>
+                                <input inputMode="decimal" enterKeyHint="done" value="{{ item.price }}" onChange="{{ item.onPrice }}" onKeyDown="{{ item.onDoneKey }}" placeholder="0.00" style="{{ priceInputStyle }}" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)">
+                              </div>
+                            </label>
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px dashed var(--border)">
+                              <div style="display:flex;flex-direction:column;gap:2px">
+                                <span style="font-size:13px;color:var(--muted)">Line total</span>
+                                <span style="font:600 18px/1.2 'Geist Mono',monospace">{{ item.total }}</span>
+                              </div>
+                              <button onClick="{{ item.onClose }}" style="height:48px;padding:0 20px;border:0;border-radius:12px;background:var(--text);color:var(--surface);font:inherit;font-size:15px;font-weight:600;cursor:pointer" style-active="transform:scale(.97)">Done</button>
+                            </div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ noItems }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:20px 10px;text-align:center;font-size:14px;color:var(--muted)">No line items. Add one to start.</div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+              <button onClick="{{ addItem }}" disabled="{{ atLimit }}" style="{{ addBtnStyle }}" style-hover="background:var(--accentSoft)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M12 11v6M9 14h6"></path></svg>
+                Add new line
+              </button>
+              <span style="margin-left:auto;padding-right:10px;font:500 12px/1 'Geist Mono',monospace;color:var(--muted)">{{ rowsUsed }}</span>
+              <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">5</span></sc-if>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding:20px 4px 0">
+            <div></div>
+            <div style="display:flex;align-items:flex-end;gap:10px">
+              <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2);margin-bottom:10px">6</span></sc-if>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+                <span style="font-size:14px;color:var(--muted)">Total due ({{ currency }})</span>
+                <div style="display:flex;align-items:baseline;gap:6px;font-family:'Geist Mono',monospace;letter-spacing:-0.03em">
+                  <span style="font-size:22px;color:var(--muted);font-weight:500">{{ symbol }}</span>
+                  <span style="font-size:clamp(30px,4vw,42px);font-weight:600;line-height:1.1">{{ totalNum }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="background:var(--surface);border:1px solid var(--border);border-radius:16px">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border)"><h2 style="margin:0;font-size:19px;font-weight:500">Notes &amp; payment terms</h2></div>
+        <div style="padding:20px">
+          <textarea rows="4" value="{{ notes }}" onChange="{{ onNotes }}" placeholder="Add payment terms, bank details or a thank-you note" style="padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font:inherit;font-size:15px;line-height:1.55;outline:none;box-sizing:border-box;width:100%;resize:vertical;min-height:110px;transition:border-color 140ms,box-shadow 140ms" style-hover="border-color:var(--borderStrong)" style-focus="border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)"></textarea>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ asideVisible }}" hint-placeholder-val="{{ true }}">
+      <aside style="flex:1 1 460px;min-width:0;max-width:760px;margin:0 auto;position:sticky;top:96px;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:0 20px 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <sc-if value="{{ previewOpen }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ closePreview }}" title="Back to editing" style="width:36px;height:36px;margin-left:-6px;display:grid;place-items:center;border:0;background:transparent;color:var(--text);border-radius:10px;cursor:pointer" style-hover="background:var(--hover)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+            </sc-if>
+            <h2 style="margin:0;font-size:19px;font-weight:500">Preview</h2>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accentInk)"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span>Live</span>
+            <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">9</span></sc-if>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:14px;white-space:nowrap;flex:none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>PDF · A4
+          </span>
+        </div>
+        <div style="position:relative;aspect-ratio:595.44/841.92;container-type:inline-size;background:#fff url('assets/invoice-letterhead.png') center/100% 100% no-repeat;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 12px 32px -12px rgba(0,0,0,.22);overflow:hidden;color:#111;font-family:'Roboto Mono',ui-monospace,monospace;letter-spacing:0">
+          <span style="position:absolute;left:12.93%;top:30.76%;font-size:1.679cqw;line-height:1.2;white-space:nowrap">{{ numberOut }}</span>
+          <span style="position:absolute;left:15.11%;top:32.31%;font-size:1.679cqw;line-height:1.2;white-space:nowrap">{{ dateOut }}</span>
+          <div style="position:absolute;left:9.07%;top:40.62%;width:60%;font-size:1.679cqw;line-height:1.8;white-space:pre-line">{{ toBlock }}</div>
+          <span style="position:absolute;left:17.63%;top:52.86%;max-width:75%;font-size:1.679cqw;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ subject }}</span>
+          <sc-for list="{{ previewRows }}" as="p" hint-placeholder-count="3">
+            <div style="{{ p.style }}">
+              <span style="position:absolute;left:9.74%">{{ p.sl }}</span>
+              <span style="position:absolute;left:15.11%;max-width:42%;overflow:hidden;text-overflow:ellipsis">{{ p.desc }}</span>
+              <span style="position:absolute;left:58.78%">{{ p.qty }}</span>
+              <span style="position:absolute;left:69.7%">{{ p.price }}</span>
+              <span style="position:absolute;left:81.12%">{{ p.total }}</span>
+            </div>
+          </sc-for>
+          <span style="position:absolute;left:80.95%;top:68.68%;font-size:1.847cqw;line-height:1.2;white-space:nowrap">{{ plainTotal }}</span>
+          <span style="position:absolute;right:9.3%;top:71.24%;max-width:84%;font-size:1.511cqw;line-height:1.2;text-align:right">{{ totalWords }}</span>
+          <div style="position:absolute;left:9.07%;top:74.92%;width:82%;font-size:1.511cqw;line-height:1.45;white-space:pre-line;max-height:3.6%;overflow:hidden">{{ notes }}</div>
+        </div>
+      </aside>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="position:sticky;bottom:24px;height:0;z-index:30;display:flex;justify-content:center">
+      <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;bottom:0;display:flex;align-items:center;gap:12px;padding:10px 10px 10px 16px;border-radius:12px;background:var(--toastBg);color:var(--toastInk);font-size:14px;box-shadow:0 12px 32px -8px rgba(0,0,0,.35);animation:ivtoast 220ms ease-out;white-space:nowrap">
+          <span>{{ toastText }}</span>
+          <sc-if value="{{ toastUndo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ undo }}" style="height:32px;padding:0 10px;border:0;border-radius:8px;background:rgba(127,127,127,.18);color:inherit;font:inherit;font-weight:600;cursor:pointer">Undo</button></sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div style="position:sticky;bottom:0;z-index:30">
+      <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:12px;right:12px;bottom:calc(100% + 10px);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px 8px 14px;border-radius:12px;background:var(--toastBg);color:var(--toastInk);font-size:14px;box-shadow:0 12px 32px -8px rgba(0,0,0,.35);animation:ivtoast 220ms ease-out">
+          <span>{{ toastText }}</span>
+          <sc-if value="{{ toastUndo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ undo }}" style="height:36px;padding:0 12px;border:0;border-radius:8px;background:rgba(127,127,127,.18);color:inherit;font:inherit;font-weight:600;cursor:pointer">Undo</button></sc-if>
+        </div>
+      </sc-if>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 16px;background:var(--surface);border-top:1px solid var(--border)">
+        <div style="display:flex;flex-direction:column;min-width:0">
+          <span style="font-size:13px;color:var(--muted)">Total due ({{ currency }})</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:20px;font-weight:600;letter-spacing:-0.02em;white-space:nowrap">{{ totalText }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <sc-if value="{{ annotate }}" hint-placeholder-val="{{ false }}"><span style="display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 11px/1 'Geist Mono',monospace;flex:none;box-shadow:0 0 0 3px oklch(0.66 0.19 40 / .2)">7</span></sc-if>
+          <button onClick="{{ generate }}" style="{{ genStyle }}" style-active="transform:scale(.97)">
+            <sc-if value="{{ genIdle }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg></sc-if>
+            <sc-if value="{{ genLoading }}" hint-placeholder-val="{{ false }}"><span style="width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:ivspin .7s linear infinite;box-sizing:border-box"></span></sc-if>
+            <sc-if value="{{ genDone }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+            <span>{{ genLabelShort }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;'auto'|'desktop'|'mobile'&quot;},&quot;annotate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const clean = v => v.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+const num = v => parseFloat(v) || 0;
+const fmt = (n, c) => n.toLocaleString(c === 'INR' ? 'en-IN' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const SYM = { INR: '₹', AED: 'AED' };
+const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+const w2 = n => n < 20 ? ONES[n] : TENS[Math.floor(n/10)] + (n%10 ? ' ' + ONES[n%10] : '');
+const w3 = n => (n >= 100 ? ONES[Math.floor(n/100)] + ' Hundred' + (n%100 ? ' ' : '') : '') + (n%100 ? w2(n%100) : '');
+const words = (n, indian) => {
+  n = Math.floor(n); if (!n) return 'Zero';
+  const parts = []; const scales = indian ? [[1e7,'Crore'],[1e5,'Lakh'],[1e3,'Thousand']] : [[1e9,'Billion'],[1e6,'Million'],[1e3,'Thousand']];
+  for (const [v, name] of scales) { if (n >= v) { const q = Math.floor(n / v); parts.push((q >= 1000 || (indian && q >= 100 && v === 1e7) ? words(q, indian) : w3(q)) + ' ' + name); n %= v; } }
+  if (n) parts.push(w3(n));
+  return parts.join(' ');
+};
+const inWords = (t, c) => { const whole = Math.floor(t + 1e-9), frac = Math.round((t - whole) * 100);
+  const sub = frac ? ' and ' + w2(frac) + (c === 'INR' ? ' Paise' : ' Fils') : '';
+  return (c === 'INR' ? 'Rs. ' : 'AED ') + words(whole, c === 'INR') + sub + ' only'; };
+const NAMES = { INR: 'INR · Indian Rupee', AED: 'AED · UAE Dirham' };
+let uid = 100;
+const seed = () => ({
+  number: '687686868', date: '2026-10-26', billTo: 'Lumen Studio Pvt. Ltd.',
+  address: '2nd Floor, 14 MG Road\nKochi, Kerala 682016',
+  subject: 'Retouching for autumn catalogue', currency: 'INR',
+  notes: 'Payment due within 15 days of the invoice date.',
+  items: [
+    { id: 1, desc: 'Image compositing, key visual', qty: '1', price: '6500', phase: 'shown' },
+    { id: 2, desc: 'Colour correction', qty: '24', price: '250', phase: 'shown' },
+    { id: 3, desc: 'Beauty retouching', qty: '12', price: '400', phase: 'shown' },
+  ],
+});
+const THEMES = {
+  light: { '--bg': '#F3F3F1', '--surface': '#FFFFFF', '--surface2': '#F6F6F4', '--panel': '#ECECEA', '--rowHover': '#EEEEEB', '--hover': '#FAFAF9', '--border': '#E6E6E3', '--borderStrong': '#CFCFCB', '--text': '#151615', '--muted': '#6B6D6A', '--faint': '#A0A29E', '--accent': 'oklch(0.57 0.12 232)', '--accentInk': 'oklch(0.5 0.11 232)', '--accentSoft': 'oklch(0.95 0.03 228)', '--ring': 'oklch(0.69 0.13 228 / .22)', '--danger': '#E5484D', '--dangerSoft': '#FDECEC', '--toastBg': '#151615', '--toastInk': '#F3F3F1', colorScheme: 'light' },
+  dark: { '--bg': '#0C0D0C', '--surface': '#151615', '--surface2': '#1B1C1B', '--panel': '#111211', '--rowHover': '#222322', '--hover': '#1D1E1D', '--border': '#262826', '--borderStrong': '#3A3C3A', '--text': '#EDEEEC', '--muted': '#A2A5A0', '--faint': '#6C6F6B', '--accent': 'oklch(0.57 0.12 232)', '--accentInk': 'oklch(0.8 0.11 228)', '--accentSoft': 'oklch(0.3 0.05 230)', '--ring': 'oklch(0.69 0.13 228 / .3)', '--danger': '#FF6B70', '--dangerSoft': 'rgba(255,107,112,.12)', '--toastBg': '#EDEEEC', '--toastInk': '#151615', colorScheme: 'dark' },
+};
+
+class Component extends DCLogic {
+  state = { ...seed(), previewOpen: false, openId: null, dark: (this.props && this.props.theme) === 'dark', w: 1440, gen: 'idle', toast: null, undoSnap: null };
+  rootRef = React.createRef();
+  timers = [];
+
+  componentDidMount() {
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) {
+      this.ro = new ResizeObserver(e => { const w = e[0].contentRect.width; if (Math.abs(w - this.state.w) > 1) this.setState({ w }); });
+      this.ro.observe(el);
+    }
+  }
+  componentDidUpdate(pp) { if (pp.theme !== this.props.theme) this.setState({ dark: this.props.theme === 'dark' }); }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); this.timers.forEach(clearTimeout); }
+  scrollTop() {
+    let el = this.rootRef.current && this.rootRef.current.parentElement;
+    while (el && el !== document.body) { if (el.scrollHeight > el.clientHeight && /auto|scroll/.test(getComputedStyle(el).overflowY)) { el.scrollTop = 0; break; } el = el.parentElement; }
+    window.scrollTo(0, 0);
+  }
+  later(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+
+  showToast(text, undo) {
+    clearTimeout(this.toastT);
+    this.setState({ toast: { text, undo: !!undo } });
+    this.toastT = setTimeout(() => this.setState({ toast: null, undoSnap: null }), undo ? 5000 : 2600);
+  }
+  patchItem(id, patch) { this.setState(s => ({ items: s.items.map(it => it.id === id ? { ...it, ...patch } : it) })); }
+  addItem = () => {
+    if (this.state.items.filter(i => i.phase !== 'out').length >= 5) return;
+    const id = ++uid;
+    this.setState(s => ({ openId: id, items: [...s.items, { id, desc: '', qty: '1', price: '', phase: 'in' }] }));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      this.patchItem(id, { phase: 'shown' });
+      const f = this.rootRef.current && this.rootRef.current.querySelector(`[data-desc="${id}"]`);
+      f && f.focus({ preventScroll: true });
+    }));
+  };
+  removeItem(id) {
+    this.patchItem(id, { phase: 'out' });
+    this.later(() => this.setState(s => ({ items: s.items.filter(it => it.id !== id) })), 230);
+  }
+  generate = () => {
+    if (this.state.gen !== 'idle') return;
+    this.setState({ gen: 'loading' });
+    this.later(() => { this.setState({ gen: 'done' }); this.showToast(`${this.state.number || 'invoice'}.pdf downloaded`); }, 1100);
+    this.later(() => this.setState({ gen: 'idle' }), 2600);
+  };
+  newInvoice = () => {
+    const s = this.state;
+    const snap = { number: s.number, date: s.date, billTo: s.billTo, address: s.address, subject: s.subject, notes: s.notes, items: s.items, currency: s.currency };
+    const m = /(\d+)(?!.*\d)/.exec(s.number || '');
+    const next = m ? s.number.slice(0, m.index) + String(+m[1] + 1).padStart(m[1].length, '0') + s.number.slice(m.index + m[1].length) : '';
+    this.setState({ undoSnap: snap, number: next, date: new Date().toISOString().slice(0, 10), billTo: '', address: '', subject: '', notes: '', items: [{ id: ++uid, desc: '', qty: '1', price: '', phase: 'shown' }] });
+    this.showToast('Started a new invoice', true);
+  };
+  undo = () => { if (this.state.undoSnap) { this.setState({ ...this.state.undoSnap, undoSnap: null, toast: null }); } };
+
+  renderVals() {
+    const s = this.state, c = s.currency, sym = SYM[c];
+    const layout = this.props.layout || 'auto';
+    const isDesktop = layout === 'desktop' || (layout === 'auto' && s.w >= 820);
+    const showPreview = isDesktop && (layout === 'desktop' || s.w >= 1180);
+    const money = n => `${sym} ${fmt(n, c)}`;
+    const total = s.items.filter(i => i.phase !== 'out').reduce((a, i) => a + num(i.qty) * num(i.price), 0);
+    const live = s.items.filter(i => i.phase !== 'out');
+    const field = k => e => this.setState({ [k]: e.target.value });
+    const pillBtn = on => ({ position: 'relative', zIndex: 1, height: 36, padding: '0 16px', border: 0, background: 'transparent', borderRadius: 999, font: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', color: on ? 'var(--text)' : 'var(--muted)', transition: 'color 180ms', whiteSpace: 'nowrap' });
+    const d = s.date ? new Date(s.date + 'T00:00:00') : null;
+    const initials = (s.billTo || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '··';
+    const gen = s.gen;
+    return {
+      rootRef: this.rootRef,
+      rootStyle: { ...THEMES[s.dark ? 'dark' : 'light'], position: 'relative', minHeight: '100%', background: 'var(--bg)', color: 'var(--text)', fontFamily: "'Figtree', ui-sans-serif, system-ui, sans-serif", fontSize: 15, lineHeight: 1.4, WebkitFontSmoothing: 'antialiased', transition: 'background 200ms, color 200ms' },
+      annotate: !!this.props.annotate,
+      dark: s.dark, light: !s.dark,
+      toggleTheme: () => this.setState(x => ({ dark: !x.dark })),
+      isDesktop, isMobile: !isDesktop, showPreview,
+      showPreviewBtn: !showPreview,
+      togglePreview: () => { this.setState(x => ({ previewOpen: !x.previewOpen })); this.scrollTop(); },
+      previewBtnStyle: { height: 44, padding: '0 14px', border: '1px solid ' + (s.previewOpen ? 'var(--accent)' : 'var(--border)'), background: s.previewOpen ? 'var(--accentSoft)' : 'var(--surface)', color: s.previewOpen ? 'var(--accentInk)' : 'var(--text)', borderRadius: 12, font: 'inherit', fontSize: 15, fontWeight: 500, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', flex: 'none', transition: 'background 140ms, border-color 140ms, color 140ms' },
+      previewOpen: !showPreview && s.previewOpen,
+      previewClosed: !(!showPreview && s.previewOpen),
+      formVisible: showPreview || !s.previewOpen,
+      asideVisible: showPreview || s.previewOpen,
+      openPreview: () => { this.setState({ previewOpen: true }); this.scrollTop(); },
+      closePreview: () => { this.setState({ previewOpen: false }); this.scrollTop(); },
+      number: s.number, date: s.date, billTo: s.billTo, address: s.address, subject: s.subject, notes: s.notes,
+      onNumber: field('number'), onDate: field('date'), onBillTo: field('billTo'), onAddress: field('address'), onSubject: field('subject'), onNotes: field('notes'),
+      initials,
+      currency: c, symbol: sym, currencyName: NAMES[c],
+      setINR: () => this.setState({ currency: 'INR' }), setAED: () => this.setState({ currency: 'AED' }),
+      thumbStyle: { position: 'absolute', top: 4, bottom: 4, left: 4, width: 'calc(50% - 4px)', borderRadius: 999, background: 'var(--surface)', boxShadow: '0 1px 2px rgba(0,0,0,.08), 0 0 0 1px var(--border)', transform: c === 'AED' ? 'translateX(100%)' : 'none', transition: 'transform 240ms cubic-bezier(.3,.7,.2,1)' },
+      inrStyle: pillBtn(c === 'INR'), aedStyle: pillBtn(c === 'AED'),
+      itemCount: live.length, noItems: live.length === 0,
+      items: s.items.map((it, i) => ({
+        id: String(it.id), idx: String(i + 1).padStart(2, '0'), desc: it.desc, qty: it.qty, price: it.price,
+        total: fmt(num(it.qty) * num(it.price), c),
+        anim: { display: 'grid', gridTemplateRows: it.phase === 'shown' ? '1fr' : '0fr', opacity: it.phase === 'shown' ? 1 : 0, transform: it.phase === 'in' ? 'translateY(-4px)' : 'none', transition: 'grid-template-rows 220ms cubic-bezier(.3,.7,.2,1), opacity 180ms, transform 220ms' },
+        onDesc: e => this.patchItem(it.id, { desc: e.target.value }),
+        onQty: e => this.patchItem(it.id, { qty: clean(e.target.value) }),
+        onPrice: e => this.patchItem(it.id, { price: clean(e.target.value) }),
+        onKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.addItem(); } },
+        onRemove: () => this.removeItem(it.id),
+        n: String(i + 1), collapsed: s.openId !== it.id, expanded: s.openId === it.id,
+        title: it.desc || 'Untitled item',
+        titleStyle: { fontSize: 16, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: it.desc ? 'var(--text)' : 'var(--faint)' },
+        calc: (it.qty || '0') + ' × ' + fmt(num(it.price), c),
+        cardStyle: { borderRadius: 14, background: 'var(--surface)', border: '1px solid ' + (s.openId === it.id ? 'var(--accent)' : 'var(--border)'), boxShadow: s.openId === it.id ? '0 0 0 4px var(--ring)' : 'none', transition: 'border-color 160ms, box-shadow 160ms' },
+        onOpen: () => this.setState({ openId: it.id }),
+        onClose: () => this.setState({ openId: null }),
+        onDoneKey: e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); this.setState({ openId: null }); } },
+        onInc: () => this.patchItem(it.id, { qty: String(Math.floor(num(it.qty)) + 1) }),
+        onDec: () => this.patchItem(it.id, { qty: String(Math.max(0, Math.ceil(num(it.qty)) - 1)) }),
+      })),
+      priceInputStyle: { height: 52, padding: '0 14px 0 ' + (c === 'INR' ? 34 : 54) + 'px', border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', color: 'var(--text)', fontFamily: "'Geist Mono',monospace", fontSize: 17, fontWeight: 500, outline: 'none', boxSizing: 'border-box', width: '100%' },
+      addItem: this.addItem,
+      totalText: money(total), totalNum: fmt(total, c),
+      previewRows: live.slice(0, 5).map((it, i) => ({ sl: String(i + 1), desc: it.desc, qty: it.qty || '', price: num(it.price).toFixed(2), total: (num(it.qty) * num(it.price)).toFixed(2),
+        style: { position: 'absolute', left: 0, right: 0, top: ((498 + 15 * i - 7.2) / 8.4192) + '%', fontSize: '1.511cqw', lineHeight: 1.2, whiteSpace: 'nowrap' } })),
+      atLimit: live.length >= 5, rowsUsed: live.length >= 5 ? 'Max 5 rows · paper limit' : live.length + ' / 5 rows',
+      addBtnStyle: { height: 44, padding: '0 10px', display: 'inline-flex', alignItems: 'center', gap: 8, border: 0, background: 'transparent', color: live.length >= 5 ? 'var(--faint)' : 'var(--accentInk)', font: 'inherit', fontSize: 15, fontWeight: 500, borderRadius: 10, cursor: live.length >= 5 ? 'not-allowed' : 'pointer', pointerEvents: live.length >= 5 ? 'none' : 'auto', transition: 'background 140ms, color 140ms' },
+      plainTotal: total.toFixed(2), totalWords: inWords(total, c),
+      toBlock: [s.billTo, s.address].filter(x => x && x.trim()).join('\n'),
+      previewItems: live.map(it => ({ desc: it.desc || '—', qty: it.qty || '0', price: fmt(num(it.price), c), total: fmt(num(it.qty) * num(it.price), c) })),
+      numberOut: s.number, dateOut: d && !isNaN(d) ? d.toLocaleDateString('en-GB') : '',
+      subjectOut: s.subject || '—', billToOut: s.billTo || '—', hasNotes: !!s.notes.trim(),
+      generate: this.generate, newInvoice: this.newInvoice, undo: this.undo,
+      genIdle: gen === 'idle', genLoading: gen === 'loading', genDone: gen === 'done',
+      genLabel: gen === 'loading' ? 'Generating…' : gen === 'done' ? 'Downloaded' : 'Generate invoice',
+      genLabelShort: gen === 'loading' ? 'Generating…' : gen === 'done' ? 'Done' : 'Generate',
+      genStyle: { height: 48, padding: '0 20px', border: 0, borderRadius: 12, background: 'var(--accent)', color: '#fff', font: 'inherit', fontSize: 16, fontWeight: 600, cursor: gen === 'idle' ? 'pointer' : 'default', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'transform 120ms, filter 160ms', whiteSpace: 'nowrap', minWidth: isDesktop ? 196 : 0, justifyContent: 'center' },
+      hasToast: !!s.toast, toastText: s.toast ? s.toast.text : '', toastUndo: !!(s.toast && s.toast.undo),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Mulish:wght@300;400&family=Roboto+Mono:wght@400;500;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#E4E4E1}
+a{color:#1488b0}a:hover{opacity:.8}
+</style>
+</helmet>
+<section style="padding:64px;display:flex;flex-direction:column;gap:56px;font-family:'Figtree',system-ui,sans-serif;color:#151615;width:max-content">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span style="font:500 13px/1 'Geist Mono',monospace;color:#6B6D6A;letter-spacing:.04em">INVOICE GENERATOR · SINGLE SCREEN</span>
+    <h1 style="margin:0;font-size:40px;font-weight:600;letter-spacing:-0.02em">Create invoice</h1>
+  </div>
+
+  <div style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font:500 13px/1 'Geist Mono',monospace;color:#6B6D6A">DESKTOP · LIGHT · 1440 — annotated</span>
+      <div style="width:1440px;border-radius:20px;overflow:clip;box-shadow:0 30px 60px -30px rgba(0,0,0,.35)">
+        <dc-import name="InvoiceApp" theme="light" layout="desktop" annotate="{{ true }}" style="width:1440px" hint-size="1440px,1180px"></dc-import>
+      </div>
+    </div>
+    <div style="width:380px;display:flex;flex-direction:column;gap:20px;padding-top:28px">
+      <span style="font-size:20px;font-weight:600">Interactions</span>
+      <sc-for list="{{ notes }}" as="n" hint-placeholder-count="9">
+        <div style="display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start">
+          <span style="display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:oklch(0.66 0.19 40);color:#fff;font:600 12px/1 'Geist Mono',monospace">{{ n.n }}</span>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:16px;font-weight:600">{{ n.t }}</span>
+            <span style="font-size:15px;line-height:1.5;color:#4A4C49;text-wrap:pretty">{{ n.d }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <span style="font:500 13px/1 'Geist Mono',monospace;color:#6B6D6A">DESKTOP · DARK · 1440</span>
+    <div style="width:1440px;border-radius:20px;overflow:clip;box-shadow:0 30px 60px -30px rgba(0,0,0,.35)">
+      <dc-import name="InvoiceApp" theme="dark" layout="desktop" style="width:1440px" hint-size="1440px,1180px"></dc-import>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font:500 13px/1 'Geist Mono',monospace;color:#6B6D6A">MOBILE · LIGHT · 390 — annotated, scrolls</span>
+      <div style="width:406px;box-sizing:border-box;height:860px;border-radius:36px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;border:8px solid #151615;box-shadow:0 30px 60px -30px rgba(0,0,0,.4)">
+        <dc-import name="InvoiceApp" theme="light" layout="mobile" annotate="{{ true }}" style="width:100%" hint-size="390px,844px"></dc-import>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font:500 13px/1 'Geist Mono',monospace;color:#6B6D6A">MOBILE · DARK · 390</span>
+      <div style="width:406px;box-sizing:border-box;height:860px;border-radius:36px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;border:8px solid #151615;box-shadow:0 30px 60px -30px rgba(0,0,0,.4)">
+        <dc-import name="InvoiceApp" theme="dark" layout="mobile" style="width:100%" hint-size="390px,844px"></dc-import>
+      </div>
+    </div>
+    <div style="width:360px;display:flex;flex-direction:column;gap:12px;padding-top:28px;font-size:15px;line-height:1.5;color:#4A4C49">
+      <span style="font-size:20px;font-weight:600;color:#151615">Mobile changes</span>
+      <span>Line items collapse to one-line summaries (name, qty × price, total). Tap one to edit it: full-width fields, a −/+ quantity stepper, a currency-prefixed price field and a Done button. Only one item is open at a time; a new item opens ready to type.</span>
+      <span>Preview panel is hidden. Total and Generate move into a sticky bottom bar so the CTA is always in reach.</span>
+      <span>All tap targets are 44px or larger. New invoice collapses to an icon.</span>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { notes: [
+      { n: 1, t: 'Theme toggle', d: 'Switches light and dark instantly. The PDF preview stays on white paper in both modes.' },
+      { n: 2, t: 'Currency pill', d: 'Thumb slides between INR and AED (240ms). Every amount re-formats at once: INR uses lakh grouping (1,77,000.00), AED uses 177,000.00.' },
+      { n: 3, t: 'Line item rows', d: 'Spreadsheet-style: hover tints the row, the focused cell gets a blue ring, Tab moves across cells. Enter in any cell appends a row and focuses its description.' },
+      { n: 4, t: 'Delete row', d: 'Row collapses (height + fade, 220ms) before it is removed. Totals update immediately.' },
+      { n: 5, t: 'Add new line', d: 'New row expands in from zero height and its description field takes focus.' },
+      { n: 6, t: 'Total due', d: 'Qty × Price per row, summed on every keystroke. Shown large in monospace so digits stay aligned.' },
+      { n: 7, t: 'Generate invoice', d: 'Press scales to 97%. Shows a spinner, then a check with “Downloaded”, plus a toast naming the file.' },
+      { n: 8, t: 'New invoice', d: 'Clears the form and increments the invoice number. A toast offers Undo for 5 seconds instead of a confirm dialog.' },
+      { n: 9, t: 'Live preview', d: 'Paper rendering of the PDF that updates as you type. Shown on wide screens only.' },
+    ] };
+  }
+}
+</script>
+</body>
+</html>
