@@ -77,10 +77,16 @@ const Navbar = ({
       <header className="navbar">
         {/* Brand */}
         <div className="brand">
-          <div className="brand-plate" onClick={onNewInvoice} title="New invoice">
+          <a
+            className="brand-plate"
+            href="https://www.behance.net/prmurugaraj"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="behance.net/prmurugaraj"
+          >
             <span className="brand-name">murugaraj</span>
             <span className="brand-sub">Creative Retoucher</span>
-          </div>
+          </a>
           <span className="brand-label">Invoice generator</span>
         </div>
 
