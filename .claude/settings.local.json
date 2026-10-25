@@ -4,7 +4,9 @@
       "Bash(npm run build:*)",
       "Bash(winget:*)",
       "Bash(npx vercel env add:*)",
-      "Bash(npx vercel env pull:*)"
+      "Bash(npx vercel env pull:*)",
+      "Bash(cd:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
