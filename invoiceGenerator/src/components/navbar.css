@@ -230,6 +230,36 @@
 
 .nav-btn-generate-mobile:active { transform: scale(.97); }
 
+/* ── Mobile footer left group ────────────────────────── */
+.mobile-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.mobile-nav-history-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+.mobile-nav-history-btn:hover,
+.mobile-nav-history-btn:active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
 /* ── Toast ───────────────────────────────────────────── */
 .toast-wrapper-desktop {
   position: fixed;

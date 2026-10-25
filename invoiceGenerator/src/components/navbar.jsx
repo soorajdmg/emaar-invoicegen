@@ -188,9 +188,21 @@ const Navbar = ({
 
       {/* Mobile sticky footer */}
       {!minimal && <div className="mobile-footer show-mobile">
-        <div className="mobile-total">
-          <span className="mobile-total-label">Total due ({invoiceData?.currency})</span>
-          <span className="mobile-total-amount">{totalText}</span>
+        <div className="mobile-footer-left">
+          {onNavigateHistory && (
+            <button
+              className="mobile-nav-history-btn"
+              onClick={onNavigateHistory}
+              title="View invoices"
+              aria-label="View saved invoices"
+            >
+              <HistoryIcon />
+            </button>
+          )}
+          <div className="mobile-total">
+            <span className="mobile-total-label">Total due ({invoiceData?.currency})</span>
+            <span className="mobile-total-amount">{totalText}</span>
+          </div>
         </div>
         <button
           className="nav-btn-generate-mobile"
