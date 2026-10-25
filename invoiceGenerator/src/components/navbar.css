@@ -39,6 +39,7 @@
   white-space: nowrap;
   flex: none;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .brand-name {
