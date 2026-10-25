@@ -32,6 +32,19 @@ const AlertIcon = () => (
     <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
   </svg>
 );
+const FilterIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" y1="6" x2="20" y2="6"/>
+    <line x1="8" y1="12" x2="16" y2="12"/>
+    <line x1="11" y1="18" x2="13" y2="18"/>
+  </svg>
+);
+const ChevronIcon = ({ open }) => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+    style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 200ms ease' }}>
+    <path d="M6 9l6 6 6-6"/>
+  </svg>
+);
 
 const ConfirmModal = ({ message, subtext, onConfirm, onCancel }) => (
   <div className="confirm-overlay" onClick={onCancel}>
@@ -89,6 +102,231 @@ const MarqueeCell = ({ text, className, cellClassName, dataLabel }) => {
   );
 };
 
+// Swipeable card row for invoices
+const InvoiceCard = ({ inv, swipedId, setSwipedId, expandedId, setExpandedId, onLoad, onDelete, deleting }) => {
+  const touchStartX = useRef(null);
+  const isSwiped = swipedId === inv.id;
+  const isExpanded = expandedId === inv.id;
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (deltaX < -60) {
+      setSwipedId(inv.id);
+      setExpandedId(null);
+    } else if (deltaX > 40) {
+      setSwipedId(null);
+    }
+  };
+
+  const handleCardTap = () => {
+    if (isSwiped) {
+      setSwipedId(null);
+      return;
+    }
+    setExpandedId(isExpanded ? null : inv.id);
+  };
+
+  return (
+    <tr
+      className="history-row history-mobile-card"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <td colSpan={7} style={{ padding: 0, border: 'none' }}>
+        <div className="mobile-card-outer">
+          {/* Swipe action strip (behind card) */}
+          <div className="mobile-card-swipe-actions">
+            <button
+              className="mobile-swipe-btn mobile-swipe-load"
+              onClick={(e) => { e.stopPropagation(); onLoad(inv.id); }}
+              title="Load into form"
+            >
+              <LoadIcon />
+            </button>
+            <button
+              className="mobile-swipe-btn mobile-swipe-delete"
+              onClick={(e) => { e.stopPropagation(); onDelete(inv.id, inv.invoiceNumber); }}
+              disabled={deleting === inv.id}
+              title="Delete invoice"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+
+          {/* Card face */}
+          <div
+            className={`mobile-card-inner${isSwiped ? ' swiped' : ''}`}
+            onClick={handleCardTap}
+          >
+            {/* Row 1: Invoice # + Total */}
+            <div className="mobile-card-row1">
+              <div className="mobile-card-left">
+                <span className="mobile-card-inv-num">{inv.invoiceNumber || '—'}</span>
+                <span className={`history-currency-badge history-currency-${inv.currency?.toLowerCase()}`}>
+                  {inv.currency}
+                </span>
+              </div>
+              <div className="mobile-card-total">
+                <span className="history-total-sym">{inv.currency === 'INR' ? '₹' : 'AED'}</span>
+                {fmt(inv.total || 0, inv.currency)}
+              </div>
+            </div>
+
+            {/* Row 2: Customer · Date */}
+            <div className="mobile-card-row2">
+              <span className="mobile-card-customer">{inv.customerName || '—'}</span>
+              <span className="mobile-card-dot">·</span>
+              <span className="mobile-card-date">{formatDate(inv.date)}</span>
+            </div>
+
+            {/* Expanded action row */}
+            <div className={`mobile-card-expanded-actions${isExpanded ? ' open' : ''}`}>
+              <div className="mobile-card-expanded-actions-inner">
+                <button
+                  className="history-action-btn history-load-btn"
+                  onClick={(e) => { e.stopPropagation(); onLoad(inv.id); }}
+                  title="Load into form"
+                >
+                  <LoadIcon />
+                  <span>Load</span>
+                </button>
+                <button
+                  className="history-action-btn history-delete-btn"
+                  onClick={(e) => { e.stopPropagation(); onDelete(inv.id, inv.invoiceNumber); }}
+                  disabled={deleting === inv.id}
+                  title="Delete invoice"
+                >
+                  <TrashIcon />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+// Swipeable card row for drafts
+const DraftCard = ({ d, swipedId, setSwipedId, expandedId, setExpandedId, onLoad, onDelete, deleting }) => {
+  const touchStartX = useRef(null);
+  const isSwiped = swipedId === d.id;
+  const isExpanded = expandedId === d.id;
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (deltaX < -60) {
+      setSwipedId(d.id);
+      setExpandedId(null);
+    } else if (deltaX > 40) {
+      setSwipedId(null);
+    }
+  };
+
+  const handleCardTap = () => {
+    if (isSwiped) {
+      setSwipedId(null);
+      return;
+    }
+    setExpandedId(isExpanded ? null : d.id);
+  };
+
+  return (
+    <tr
+      className="history-row history-mobile-card"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <td colSpan={6} style={{ padding: 0, border: 'none' }}>
+        <div className="mobile-card-outer">
+          {/* Swipe action strip */}
+          <div className="mobile-card-swipe-actions">
+            <button
+              className="mobile-swipe-btn mobile-swipe-load"
+              onClick={(e) => { e.stopPropagation(); onLoad(d); }}
+              title="Restore draft"
+            >
+              <LoadIcon />
+            </button>
+            <button
+              className="mobile-swipe-btn mobile-swipe-delete"
+              onClick={(e) => { e.stopPropagation(); onDelete(d.id, d.invoiceNumber); }}
+              disabled={deleting === d.id}
+              title="Delete draft"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+
+          {/* Card face */}
+          <div
+            className={`mobile-card-inner${isSwiped ? ' swiped' : ''}`}
+            onClick={handleCardTap}
+          >
+            {/* Row 1: Invoice # + Currency */}
+            <div className="mobile-card-row1">
+              <div className="mobile-card-left">
+                <span className="mobile-card-inv-num">{d.invoiceNumber || '—'}</span>
+                <span className={`history-currency-badge history-currency-${d.currency?.toLowerCase()}`}>
+                  {d.currency}
+                </span>
+              </div>
+              <div className="mobile-card-saved-at">{formatDateTime(d.savedAt)}</div>
+            </div>
+
+            {/* Row 2: Customer */}
+            <div className="mobile-card-row2">
+              <span className="mobile-card-customer">{d.customerName || '—'}</span>
+              {d.subject && (
+                <>
+                  <span className="mobile-card-dot">·</span>
+                  <span className="mobile-card-date">{d.subject}</span>
+                </>
+              )}
+            </div>
+
+            {/* Expanded action row */}
+            <div className={`mobile-card-expanded-actions${isExpanded ? ' open' : ''}`}>
+              <div className="mobile-card-expanded-actions-inner">
+                <button
+                  className="history-action-btn history-load-btn"
+                  onClick={(e) => { e.stopPropagation(); onLoad(d); }}
+                  title="Restore draft"
+                >
+                  <LoadIcon />
+                  <span>Restore</span>
+                </button>
+                <button
+                  className="history-action-btn history-delete-btn"
+                  onClick={(e) => { e.stopPropagation(); onDelete(d.id, d.invoiceNumber); }}
+                  disabled={deleting === d.id}
+                  title="Delete draft"
+                >
+                  <TrashIcon />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
 const HistoryPage = () => {
   const navigate = useNavigate();
 
@@ -113,6 +351,15 @@ const HistoryPage = () => {
   // Confirm modal: null | { message, subtext, onConfirm }
   const [confirmState, setConfirmState] = useState(null);
   const closeConfirm = () => setConfirmState(null);
+
+  // Mobile UX state
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [swipedId, setSwipedId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+  const [draftSwipedId, setDraftSwipedId] = useState(null);
+  const [draftExpandedId, setDraftExpandedId] = useState(null);
+
+  const filtersActive = currency !== '' || sort !== 'newest';
 
   const fetchInvoices = () => {
     setLoading(true);
@@ -244,34 +491,50 @@ const HistoryPage = () => {
         <>
           {/* Filters */}
           <div className="history-filters">
-            <div className="history-search-wrap">
-              <SearchIcon />
-              <input
-                className="history-search"
-                type="text"
-                placeholder="Search by number, customer or subject…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
+            {/* Search + filter toggle row */}
+            <div className="history-search-filter-row">
+              <div className="history-search-wrap">
+                <SearchIcon />
+                <input
+                  className="history-search"
+                  type="text"
+                  placeholder="Search by number, customer or subject…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              <button
+                className={`history-filter-toggle${filtersOpen ? ' open' : ''}${filtersActive ? ' active' : ''}`}
+                onClick={() => setFiltersOpen(v => !v)}
+                aria-label="Toggle filters"
+              >
+                <FilterIcon />
+                <span className="history-filter-toggle-label">Filter</span>
+                {filtersActive && <span className="history-filter-dot" />}
+                <ChevronIcon open={filtersOpen} />
+              </button>
             </div>
 
-            <div className="history-filter-row">
-              <div className="currency-pill">
-                <div className={`currency-thumb${currency === 'AED' ? ' aed' : ''}${currency === '' ? ' all' : ''}`} />
-                <button className={`currency-option${currency === '' ? ' active' : ''}`} onClick={() => setCurrency('')}>All</button>
-                <button className={`currency-option${currency === 'INR' ? ' active' : ''}`} onClick={() => setCurrency('INR')}>INR</button>
-                <button className={`currency-option${currency === 'AED' ? ' active' : ''}`} onClick={() => setCurrency('AED')}>AED</button>
-              </div>
+            {/* Collapsible filter panel */}
+            <div className={`history-filter-panel${filtersOpen ? ' open' : ''}`}>
+              <div className="history-filter-row">
+                <div className="currency-pill">
+                  <div className={`currency-thumb${currency === 'AED' ? ' aed' : ''}${currency === '' ? ' all' : ''}`} />
+                  <button className={`currency-option${currency === '' ? ' active' : ''}`} onClick={() => setCurrency('')}>All</button>
+                  <button className={`currency-option${currency === 'INR' ? ' active' : ''}`} onClick={() => setCurrency('INR')}>INR</button>
+                  <button className={`currency-option${currency === 'AED' ? ' active' : ''}`} onClick={() => setCurrency('AED')}>AED</button>
+                </div>
 
-              <div className="history-sort-wrap">
-                <label className="history-sort-label">Sort</label>
-                <select className="history-sort-select" value={sort} onChange={e => setSort(e.target.value)}>
-                  <option value="newest">Date - newest</option>
-                  <option value="oldest">Date - oldest</option>
-                  <option value="total-desc">Amount - high to low</option>
-                  <option value="total-asc">Amount - low to high</option>
-                  <option value="customer">Customer A-Z</option>
-                </select>
+                <div className="history-sort-wrap">
+                  <label className="history-sort-label">Sort</label>
+                  <select className="history-sort-select" value={sort} onChange={e => setSort(e.target.value)}>
+                    <option value="newest">Date - newest</option>
+                    <option value="oldest">Date - oldest</option>
+                    <option value="total-desc">Amount - high to low</option>
+                    <option value="total-asc">Amount - low to high</option>
+                    <option value="customer">Customer A-Z</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -329,40 +592,56 @@ const HistoryPage = () => {
                   </thead>
                   <tbody>
                     {filtered.map(inv => (
-                      <tr key={inv.id} className="history-row">
-                        <td className="history-inv-num" data-label="Invoice #">{inv.invoiceNumber || '—'}</td>
-                        <td className="history-date" data-label="Date">{formatDate(inv.date)}</td>
-                        <MarqueeCell text={inv.customerName} className="marquee-text marquee-text--bold" cellClassName="marquee-cell" dataLabel="Customer" />
-                        <MarqueeCell text={inv.subject} className="marquee-text marquee-text--muted" cellClassName="marquee-cell hide-mobile" dataLabel="Subject" />
-                        <td data-label="Currency">
-                          <span className={`history-currency-badge history-currency-${inv.currency?.toLowerCase()}`}>
-                            {inv.currency}
-                          </span>
-                        </td>
-                        <td className="history-total" data-label="Total">
-                          <span className="history-total-sym">{inv.currency === 'INR' ? '₹' : 'AED'}</span>
-                          {fmt(inv.total || 0, inv.currency)}
-                        </td>
-                        <td className="history-actions" data-label="">
-                          <button
-                            className="history-action-btn history-load-btn"
-                            onClick={() => handleLoad(inv.id)}
-                            title="Load into form"
-                          >
-                            <LoadIcon />
-                            <span>Load</span>
-                          </button>
-                          <button
-                            className="history-action-btn history-delete-btn"
-                            onClick={() => handleDelete(inv.id, inv.invoiceNumber)}
-                            disabled={deleting === inv.id}
-                            title="Delete invoice"
-                          >
-                            <TrashIcon />
-                            <span>Delete</span>
-                          </button>
-                        </td>
-                      </tr>
+                      /* Mobile: custom card component; desktop: standard row */
+                      <>
+                        {/* Desktop row (hidden on mobile via CSS) */}
+                        <tr key={`desktop-${inv.id}`} className="history-row history-desktop-row">
+                          <td className="history-inv-num" data-label="Invoice #">{inv.invoiceNumber || '—'}</td>
+                          <td className="history-date" data-label="Date">{formatDate(inv.date)}</td>
+                          <MarqueeCell text={inv.customerName} className="marquee-text marquee-text--bold" cellClassName="marquee-cell" dataLabel="Customer" />
+                          <MarqueeCell text={inv.subject} className="marquee-text marquee-text--muted" cellClassName="marquee-cell hide-mobile" dataLabel="Subject" />
+                          <td data-label="Currency">
+                            <span className={`history-currency-badge history-currency-${inv.currency?.toLowerCase()}`}>
+                              {inv.currency}
+                            </span>
+                          </td>
+                          <td className="history-total" data-label="Total">
+                            <span className="history-total-sym">{inv.currency === 'INR' ? '₹' : 'AED'}</span>
+                            {fmt(inv.total || 0, inv.currency)}
+                          </td>
+                          <td className="history-actions" data-label="">
+                            <button
+                              className="history-action-btn history-load-btn"
+                              onClick={() => handleLoad(inv.id)}
+                              title="Load into form"
+                            >
+                              <LoadIcon />
+                              <span>Load</span>
+                            </button>
+                            <button
+                              className="history-action-btn history-delete-btn"
+                              onClick={() => handleDelete(inv.id, inv.invoiceNumber)}
+                              disabled={deleting === inv.id}
+                              title="Delete invoice"
+                            >
+                              <TrashIcon />
+                              <span>Delete</span>
+                            </button>
+                          </td>
+                        </tr>
+                        {/* Mobile card row (hidden on desktop via CSS) */}
+                        <InvoiceCard
+                          key={`mobile-${inv.id}`}
+                          inv={inv}
+                          swipedId={swipedId}
+                          setSwipedId={setSwipedId}
+                          expandedId={expandedId}
+                          setExpandedId={setExpandedId}
+                          onLoad={handleLoad}
+                          onDelete={handleDelete}
+                          deleting={deleting}
+                        />
+                      </>
                     ))}
                   </tbody>
                 </table>
@@ -421,36 +700,51 @@ const HistoryPage = () => {
                 </thead>
                 <tbody>
                   {drafts.map(d => (
-                    <tr key={d.id} className="history-row">
-                      <td className="history-date draft-saved-at" data-label="Auto-saved">{formatDateTime(d.savedAt)}</td>
-                      <td className="history-inv-num" data-label="Invoice #">{d.invoiceNumber || '—'}</td>
-                      <MarqueeCell text={d.customerName} className="marquee-text marquee-text--bold" cellClassName="marquee-cell" dataLabel="Customer" />
-                      <MarqueeCell text={d.subject} className="marquee-text marquee-text--muted" cellClassName="marquee-cell hide-mobile" dataLabel="Subject" />
-                      <td data-label="Currency">
-                        <span className={`history-currency-badge history-currency-${d.currency?.toLowerCase()}`}>
-                          {d.currency}
-                        </span>
-                      </td>
-                      <td className="history-actions" data-label="">
-                        <button
-                          className="history-action-btn history-load-btn"
-                          onClick={() => handleLoadDraft(d)}
-                          title="Restore this draft"
-                        >
-                          <LoadIcon />
-                          <span>Restore</span>
-                        </button>
-                        <button
-                          className="history-action-btn history-delete-btn"
-                          onClick={() => handleDeleteDraft(d.id, d.invoiceNumber)}
-                          disabled={deletingDraft === d.id}
-                          title="Delete draft"
-                        >
-                          <TrashIcon />
-                          <span>Delete</span>
-                        </button>
-                      </td>
-                    </tr>
+                    <>
+                      {/* Desktop row */}
+                      <tr key={`desktop-${d.id}`} className="history-row history-desktop-row">
+                        <td className="history-date draft-saved-at" data-label="Auto-saved">{formatDateTime(d.savedAt)}</td>
+                        <td className="history-inv-num" data-label="Invoice #">{d.invoiceNumber || '—'}</td>
+                        <MarqueeCell text={d.customerName} className="marquee-text marquee-text--bold" cellClassName="marquee-cell" dataLabel="Customer" />
+                        <MarqueeCell text={d.subject} className="marquee-text marquee-text--muted" cellClassName="marquee-cell hide-mobile" dataLabel="Subject" />
+                        <td data-label="Currency">
+                          <span className={`history-currency-badge history-currency-${d.currency?.toLowerCase()}`}>
+                            {d.currency}
+                          </span>
+                        </td>
+                        <td className="history-actions" data-label="">
+                          <button
+                            className="history-action-btn history-load-btn"
+                            onClick={() => handleLoadDraft(d)}
+                            title="Restore this draft"
+                          >
+                            <LoadIcon />
+                            <span>Restore</span>
+                          </button>
+                          <button
+                            className="history-action-btn history-delete-btn"
+                            onClick={() => handleDeleteDraft(d.id, d.invoiceNumber)}
+                            disabled={deletingDraft === d.id}
+                            title="Delete draft"
+                          >
+                            <TrashIcon />
+                            <span>Delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                      {/* Mobile card row */}
+                      <DraftCard
+                        key={`mobile-${d.id}`}
+                        d={d}
+                        swipedId={draftSwipedId}
+                        setSwipedId={setDraftSwipedId}
+                        expandedId={draftExpandedId}
+                        setExpandedId={setDraftExpandedId}
+                        onLoad={handleLoadDraft}
+                        onDelete={handleDeleteDraft}
+                        deleting={deletingDraft}
+                      />
+                    </>
                   ))}
                 </tbody>
               </table>

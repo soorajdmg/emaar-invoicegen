@@ -447,11 +447,66 @@
 /* ── hide-mobile helper (used by thead th / marquee cells) */
 .hide-mobile { /* no-op at desktop */ }
 
+/* ── Filter toggle button (mobile) ───────────────────── */
+.history-search-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.history-search-filter-row .history-search-wrap {
+  flex: 1;
+}
+
+.history-filter-toggle {
+  display: none; /* shown only on mobile via media query */
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: border-color 150ms, color 150ms;
+  flex-shrink: 0;
+}
+.history-filter-toggle.open,
+.history-filter-toggle.active {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.history-filter-toggle-label { font-size: 13px; }
+.history-filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Collapsible filter panel */
+.history-filter-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 250ms ease;
+}
+.history-filter-panel.open {
+  max-height: 200px;
+}
+
+/* ── Mobile card components ───────────────────────────── */
+/* Hidden by default; shown in mobile media query */
+.history-mobile-card { display: none; }
+/* Desktop rows hidden on mobile */
+.history-desktop-row { /* shown by default */ }
+
 /* ══════════════════════════════════════════════════════
-   MOBILE — card layout (≤ 640px)
-   Each <tr> becomes a self-contained card.
-   <td> renders as a labelled row inside the card using
-   the data-label attribute.
+   MOBILE — compact swipeable card layout (≤ 640px)
 ══════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
   .history-page { padding: 16px 14px 72px; }
@@ -460,20 +515,18 @@
   .history-tabs   { margin-bottom: 18px; }
 
   /* Filters */
-  .history-filters       { gap: 10px; margin-bottom: 18px; }
-  .history-filter-row    { flex-direction: column; align-items: stretch; gap: 10px; }
+  .history-filters       { gap: 8px; margin-bottom: 16px; }
+  .history-filter-toggle { display: inline-flex; }
+  .history-filter-row    { flex-direction: column; align-items: stretch; gap: 10px; padding-top: 4px; }
   .history-sort-wrap     { width: 100%; }
   .history-sort-select   { width: 100%; }
 
-  /* ── Card wrapper ── */
+  /* Table wrapper — transparent on mobile, cards float freely */
   .history-table-wrap {
     background: transparent;
     border: none;
     border-radius: 0;
     overflow: visible;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
   }
 
   /* Hide the real table header */
@@ -483,108 +536,175 @@
   .history-table,
   .history-table tbody { display: block; }
 
-  /* Each row = a card */
-  .history-table tbody tr {
+  /* Hide desktop rows, show mobile card rows */
+  .history-desktop-row { display: none !important; }
+  .history-mobile-card { display: block; }
+
+  /* The mobile card <tr> itself is just a block container */
+  .history-table tbody tr.history-mobile-card {
     display: block;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin-bottom: 10px;
+  }
+  .history-table tbody tr.history-mobile-card:hover { background: transparent; }
+
+  /* ── Outer wrapper — clips the swipe reveal ── */
+  .mobile-card-outer {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px 12px;
-    transition: box-shadow 150ms;
-    border-bottom: 1px solid var(--border) !important;
-  }
-  .history-table tbody tr:hover {
-    background: var(--surface);
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
   }
 
-  /* Each td = a labelled row */
-  .history-table td {
+  /* ── Swipe action strip (behind card) ── */
+  .mobile-card-swipe-actions {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 120px;
+    display: flex;
+    z-index: 0;
+  }
+
+  .mobile-swipe-btn {
+    flex: 1;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: opacity 150ms;
+  }
+  .mobile-swipe-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .mobile-swipe-load {
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+  .mobile-swipe-delete {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  /* ── Card face (slides on swipe) ── */
+  .mobile-card-inner {
+    position: relative;
+    z-index: 1;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 13px 15px 11px;
+    transform: translateX(0);
+    transition: transform 250ms cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .mobile-card-inner.swiped {
+    transform: translateX(-120px);
+    border-radius: 12px 0 0 12px;
+  }
+
+  /* Row 1: invoice # + total */
+  .mobile-card-row1 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 5px 0;
-    font-size: 14px;
-    border: none;
     gap: 8px;
+    margin-bottom: 5px;
   }
-
-  /* Label from data-label attr */
-  .history-table td[data-label]:not([data-label=""])::before {
-    content: attr(data-label);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    flex-shrink: 0;
-    min-width: 80px;
+  .mobile-card-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
   }
-
-  /* Invoice # — prominent at top */
-  .history-table td.history-inv-num {
-    font-size: 15px;
+  .mobile-card-inv-num {
+    font-family: 'Geist Mono', monospace;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text);
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 4px;
-    justify-content: flex-start;
-    gap: 0;
+    white-space: nowrap;
   }
-  .history-table td.history-inv-num::before { display: none; }
-
-  /* Total — right-aligned value */
-  .history-table td.history-total {
-    text-align: right;
-    justify-content: space-between;
+  .mobile-card-total {
     font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .mobile-card-total .history-total-sym {
+    font-size: 11px;
+    color: var(--muted);
+    margin-right: 2px;
   }
 
-  /* Actions — full-width row of buttons */
-  .history-table td.history-actions {
-    justify-content: flex-end;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-    margin-top: 4px;
-    white-space: normal;
+  /* Row 2: customer · date */
+  .mobile-card-row2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    min-width: 0;
+  }
+  .mobile-card-customer {
+    font-weight: 500;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .mobile-card-dot {
+    color: var(--faint);
+    flex-shrink: 0;
+  }
+  .mobile-card-date {
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .mobile-card-saved-at {
+    font-size: 11px;
+    color: var(--faint);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Expanded action row ── */
+  .mobile-card-expanded-actions {
+    display: flex;
     gap: 8px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 220ms ease;
   }
-  .history-table td.history-actions::before { display: none; }
-
-  .history-action-btn {
+  .mobile-card-expanded-actions.open {
+    max-height: 70px;
+  }
+  .mobile-card-expanded-actions-inner {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .mobile-card-expanded-actions-inner .history-action-btn {
     flex: 1;
     justify-content: center;
     padding: 8px 12px;
     font-size: 13px;
   }
-  .history-action-btn + .history-action-btn { margin-left: 0; }
-
-  /* Marquee cell — override to block */
-  .history-table td.marquee-cell {
-    display: flex;
-    max-width: 100%;
-    overflow: hidden;
+  .mobile-card-expanded-actions-inner .history-action-btn + .history-action-btn {
+    margin-left: 0;
   }
-  .history-table td.marquee-cell .marquee-wrap {
-    width: max-content;
-  }
-
-  /* Hide subject on mobile cards */
-  .history-table td.hide-mobile { display: none; }
-
-  /* Draft auto-saved timestamp — smaller */
-  .history-table td.draft-saved-at {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--muted);
-    justify-content: flex-start;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 2px;
-    gap: 0;
-  }
-  .history-table td.draft-saved-at::before { display: none; }
 
   /* Loading skeleton — simpler on mobile */
   .history-skeleton-row {
