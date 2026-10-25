@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_SIz0sc3TrLfzL4V714AOdouBH8iF",
+      "name": "emaar-invoice",
+      "directory": "invoiceGenerator",
+      "orgId": "team_OGrtxw9TI11pn8VZdpLW3Jff"
+    }
+  ]
+}
