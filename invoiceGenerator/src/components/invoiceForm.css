@@ -89,6 +89,32 @@
   background: var(--accent);
 }
 
+.preview-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.preview-expand-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 140ms, color 140ms, border-color 140ms;
+  flex: none;
+}
+.preview-expand-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
 .preview-pdf-badge {
   display: inline-flex;
   align-items: center;
@@ -101,6 +127,61 @@
   font-size: 14px;
   white-space: nowrap;
   flex: none;
+}
+
+/* ── Expanded preview overlay ────────────────────────── */
+.preview-expand-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 180ms ease;
+}
+
+.preview-expand-modal {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-expand-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 10px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  cursor: pointer;
+  transition: background 140ms;
+  z-index: 1;
+}
+.preview-expand-close:hover { background: rgba(255,255,255,.2); }
+
+.preview-expand-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  border-radius: 8px;
+  /* enable pinch-zoom on touch devices */
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.preview-canvas--expanded {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 24px 64px -16px rgba(0,0,0,.6);
 }
 
 /* ── A4 canvas ───────────────────────────────────────── */
@@ -191,6 +272,7 @@
 /* ── Currency pill toggle ─────────────────────────────── */
 .currency-pill {
   position: relative;
+  z-index: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   padding: 4px;

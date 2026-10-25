@@ -88,9 +88,20 @@ const PdfIcon = () => (
     <path d="M14 3v5h5M9 13h6M9 17h4"/>
   </svg>
 );
+const ExpandIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+  </svg>
+);
+const CloseIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 6L6 18M6 6l12 12"/>
+  </svg>
+);
 
 /* ── Preview aside ───────────────────────────────────── */
 const InvoicePreview = ({ data, onClose, showBack }) => {
+  const [expanded, setExpanded] = useState(false);
   const sym = data.currency === 'INR' ? '₹' : 'AED';
   const total = data.items.reduce(
     (s, it) => s + (Number(it.quantity)||0) * (Number(it.price)||0), 0
@@ -128,9 +139,19 @@ const InvoicePreview = ({ data, onClose, showBack }) => {
             Live
           </span>
         </div>
-        <span className="preview-pdf-badge">
-          <PdfIcon /> PDF · A4
-        </span>
+        <div className="preview-head-right">
+          <button
+            className="preview-expand-btn"
+            onClick={() => setExpanded(true)}
+            title="Expand preview"
+            aria-label="Expand preview"
+          >
+            <ExpandIcon />
+          </button>
+          <span className="preview-pdf-badge">
+            <PdfIcon /> PDF · A4
+          </span>
+        </div>
       </div>
 
       {/* A4 letterhead canvas */}
@@ -174,6 +195,41 @@ const InvoicePreview = ({ data, onClose, showBack }) => {
           {data.notes}
         </div>
       </div>
+
+      {/* Expanded fullscreen modal */}
+      {expanded && (
+        <div className="preview-expand-overlay" onClick={() => setExpanded(false)}>
+          <div className="preview-expand-modal" onClick={e => e.stopPropagation()}>
+            <button
+              className="preview-expand-close"
+              onClick={() => setExpanded(false)}
+              aria-label="Close expanded preview"
+            >
+              <CloseIcon />
+            </button>
+            <div className="preview-expand-scroll">
+              <div className="preview-canvas preview-canvas--expanded">
+                <span className="pv-text" style={{ left:'12.93%', top:'30.76%' }}>{data.invoiceNumber}</span>
+                <span className="pv-text" style={{ left:'15.11%', top:'32.31%' }}>{dateOut}</span>
+                <div className="pv-text pv-multiline" style={{ left:'9.07%', top:'40.62%', width:'60%' }}>{toBlock}</div>
+                <span className="pv-text pv-ellipsis" style={{ left:'17.63%', top:'52.86%', maxWidth:'75%' }}>{data.subject}</span>
+                {rows.map((r) => (
+                  <div key={r.sl} className="pv-row" style={{ top: r.top }}>
+                    <span style={{ position:'absolute', left:'9.74%' }}>{r.sl}</span>
+                    <span style={{ position:'absolute', left:'15.11%', maxWidth:'42%', overflow:'hidden', textOverflow:'ellipsis' }}>{r.desc}</span>
+                    <span style={{ position:'absolute', left:'58.78%' }}>{r.qty}</span>
+                    <span style={{ position:'absolute', left:'69.7%' }}>{r.price}</span>
+                    <span style={{ position:'absolute', left:'81.12%' }}>{r.total}</span>
+                  </div>
+                ))}
+                <span className="pv-text pv-total" style={{ left:'80.95%', top:'68.68%' }}>{total.toFixed(2)}</span>
+                <span className="pv-text pv-words" style={{ right:'9.3%', top:'71.24%', maxWidth:'84%', textAlign:'right' }}>{inWords(total, data.currency)}</span>
+                <div className="pv-text pv-notes" style={{ left:'9.07%', top:'74.92%', width:'82%' }}>{data.notes}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };
